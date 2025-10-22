@@ -1,4 +1,5 @@
 import jwt, { JwtPayload, Secret, SignOptions } from "jsonwebtoken";
+import config from "../../config";
 
 export const generateToken = (
   payload: JwtPayload,
@@ -9,4 +10,8 @@ export const generateToken = (
     expiresIn,
     algorithm: "HS256",
   } as SignOptions);
+};
+
+export const verifyToken = (token: string, secret: Secret) => {
+  return jwt.verify(token, secret);
 };

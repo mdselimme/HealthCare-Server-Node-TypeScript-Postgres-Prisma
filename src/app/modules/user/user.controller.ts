@@ -19,8 +19,6 @@ const createPatient = catchAsync(async (req: Request, res: Response) => {
 
 // GET ALL USER
 const getAllUser = catchAsync(async (req: Request, res: Response) => {
-  const { page, limit, searchValue, sortField, sortOrder, status, role } =
-    req.query;
 
   const filters = searchQuery(req.query, [
     "status",

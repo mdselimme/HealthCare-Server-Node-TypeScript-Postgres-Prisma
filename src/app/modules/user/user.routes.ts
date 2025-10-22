@@ -3,10 +3,16 @@ import { UserController } from "./user.controller";
 import { fileUploader } from "../../helpers/multer.helper";
 import { createUserValidationZodSchema } from "./user.validation";
 import { validZodSchemaRequest } from "../../middlewares/validZodSchemaRequest";
+import checkAuth from "../../middlewares/checkAuth";
+import { UserRole } from "@prisma/client";
 
 const router = Router();
 
-router.get("/", UserController.getAllUser);
+router.get(
+  "/",
+  checkAuth(UserRole.ADMIN, UserRole.DOCTOR),
+  UserController.getAllUser
+);
 
 router.post(
   "/create-patient",
