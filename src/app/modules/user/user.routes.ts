@@ -1,10 +1,12 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { Router } from "express";
 import { UserController } from "./user.controller";
 import { fileUploader } from "../../helpers/multer.helper";
 import { createUserValidationZodSchema } from "./user.validation";
 import { validZodSchemaRequest } from "../../middlewares/validZodSchemaRequest";
 
 const router = Router();
+
+router.get("/", UserController.getAllUser);
 
 router.post(
   "/create-patient",

@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { UserService } from "./user.service";
+import { searchQuery } from "../../helpers/searchQuery";
 
 // CREATE PATIENT
 const createPatient = catchAsync(async (req: Request, res: Response) => {
@@ -16,6 +17,35 @@ const createPatient = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// GET ALL USER
+const getAllUser = catchAsync(async (req: Request, res: Response) => {
+  const { page, limit, searchValue, sortField, sortOrder, status, role } =
+    req.query;
+
+  const filters = searchQuery(req.query, [
+    "status",
+    "role",
+    "email",
+    "searchTerm",
+  ]);
+  const options = searchQuery(req.query, [
+    "page",
+    "limit",
+    "sortField",
+    "sortOrder",
+  ]);
+
+  const result = await UserService.getAllUserDb(filters, options);
+
+  sendResponse(res, {
+    success: true,
+    message: "User Retrieved Successfully.",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
 export const UserController = {
   createPatient,
+  getAllUser,
 };
