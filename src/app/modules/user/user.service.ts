@@ -1,7 +1,6 @@
 import { Request } from "express";
 import config from "../../../config";
 import { prisma } from "../../shared/prisma";
-import { IPatientInput } from "./user.interface";
 import bcrypt from "bcryptjs";
 import { fileUploader } from "../../helpers/multer.helper";
 import { AppError } from "../../helpers/AppError";
