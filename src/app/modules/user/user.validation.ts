@@ -1,12 +1,12 @@
 import z from "zod";
 
-export const userValidationZodSchema = z.object({
+export const createUserValidationZodSchema = z.object({
   password: z
     .string({
       error: "Password must be string.",
     })
     .min(8, { error: "Password minimum 8 characters long." }),
-  patient: {
+  patient: z.object({
     name: z
       .string({
         error: "Name must be string.",
@@ -20,5 +20,5 @@ export const userValidationZodSchema = z.object({
         error: "address must be string",
       })
       .optional(),
-  },
+  }),
 });
