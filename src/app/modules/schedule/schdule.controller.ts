@@ -31,13 +31,29 @@ const doctorScheduleAll = catchAsync(async (req: Request, res: Response) => {
 
     sendResponse(res, {
         success: true,
-        message: "Schedule Created Successfully",
+        message: "Schedule Retrieved Successfully",
         data: result,
         statusCode: httpStatus.CREATED,
     });
 });
 
+// DOCTOR SCHEDULE GET 
+const deleteDoctorSchedule = catchAsync(async (req: Request, res: Response) => {
+
+
+    await ScheduleService.deleteDoctorSchedule(req.params.id);
+
+
+    sendResponse(res, {
+        success: true,
+        message: "Schedule Deleted Successfully",
+        data: null,
+        statusCode: httpStatus.OK,
+    });
+});
+
 export const ScheduleController = {
     scheduleCreate,
-    doctorScheduleAll
+    doctorScheduleAll,
+    deleteDoctorSchedule
 };
