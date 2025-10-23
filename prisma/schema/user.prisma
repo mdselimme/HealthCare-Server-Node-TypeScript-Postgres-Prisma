@@ -19,6 +19,7 @@ model Admin {
     name          String
     email         String   @unique
     profilePhoto  String?
+    address       String
     contactNumber String
     isDeleted     Boolean  @default(false)
     createdAt     DateTime @default(now())

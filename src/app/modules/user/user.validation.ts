@@ -53,3 +53,26 @@ export const createDoctorValidationZodSchema = z.object({
     designation: z.string({ error: "designation type is string." }),
   })
 });
+
+// CREATE ADMIN ZOD SCHEMA 
+export const createAdminZodSchema = z.object({
+  password: z
+    .string({
+      error: "Password must be string.",
+    })
+    .min(8, { error: "Password minimum 8 characters long." }),
+  admin: z.object({
+    name: z.string({ error: "type is string." }).min(3, { error: "min 3 characters need." }),
+    email: z.email({
+      error: "email must be string & valid email format.",
+    }),
+    contactNumber: z
+      .string()
+      .length(11, { message: "Phone number must be exactly 11 digits" })
+      .regex(/^01\d{9}$/, {
+        message:
+          "Invalid Bangladeshi phone number. It must start with '01' and be exactly 11 digits long.",
+      }),
+    address: z.string({ error: "address type is string." }),
+  })
+});
