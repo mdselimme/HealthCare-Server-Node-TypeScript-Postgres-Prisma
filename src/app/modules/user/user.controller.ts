@@ -30,6 +30,19 @@ const createUserAndDoctor = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// CREATE ADMIN
+const createUserAndAdmin = catchAsync(async (req: Request, res: Response) => {
+
+  const result = await UserService.createUserAndAdminService(req);
+
+  sendResponse(res, {
+    success: true,
+    message: "Admin Created Successfully.",
+    data: result,
+    statusCode: httpStatus.CREATED,
+  });
+});
+
 // GET ALL USER
 const getAllUser = catchAsync(async (req: Request, res: Response) => {
 
@@ -59,5 +72,6 @@ const getAllUser = catchAsync(async (req: Request, res: Response) => {
 export const UserController = {
   createPatient,
   getAllUser,
-  createUserAndDoctor
+  createUserAndDoctor,
+  createUserAndAdmin
 };

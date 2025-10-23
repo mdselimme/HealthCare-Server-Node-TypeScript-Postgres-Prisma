@@ -9,11 +9,23 @@ import { calculatePagination } from "../../helpers/paginationHelpers";
 import { Prisma, UserRole } from "@prisma/client";
 import { userSearchableFields } from "./user.constant";
 
+// UPLOAD IMAGE COMMON FUNCTION 
+const uploadImage = async (req: Request) => {
+  if (req.file) {
+    const uploadResult = await fileUploader.uploadToCloudinary(req.file);
+    if (!uploadResult?.secure_url) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Profile Image Upload Failed.");
+    }
+    const photoUrl = uploadResult?.secure_url;
+    return photoUrl;
+  }
+};
+
 // CREATE PATIENT SERVICE FUNCTION
 const createPatientService = async (req: Request) => {
   if (req.file) {
-    const uploadResult = await fileUploader.uploadToCloudinary(req.file);
-    req.body.patient.profilePhoto = uploadResult?.secure_url;
+    const imageUrl = await uploadImage(req);
+    req.body.patient.profilePhoto = imageUrl;
   }
 
   const hashPassword = await bcrypt.hash(
@@ -49,8 +61,8 @@ const createPatientService = async (req: Request) => {
 const createUserAndDoctorService = async (req: Request) => {
 
   if (req.file) {
-    const uploadResult = await fileUploader.uploadToCloudinary(req.file);
-    req.body.doctor.profilePhoto = uploadResult?.secure_url;
+    const imageUrl = await uploadImage(req);
+    req.body.doctor.profilePhoto = imageUrl;
   }
 
   const hashPassword = await bcrypt.hash(
@@ -78,6 +90,44 @@ const createUserAndDoctorService = async (req: Request) => {
     });
     return await tnx.doctor.create({
       data: req.body.doctor,
+    });
+  });
+  return result;
+};
+
+// CREATE ADMIN SERVICE FUNCTION
+const createUserAndAdminService = async (req: Request) => {
+
+  if (req.file) {
+    const imageUrl = await uploadImage(req);
+    req.body.admin.profilePhoto = imageUrl;
+  }
+
+  const hashPassword = await bcrypt.hash(
+    req.body.password,
+    Number(config.bcrypt_salt_round)
+  );
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: req.body.admin.email,
+    },
+  });
+
+  if (user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Email Already Exist.");
+  }
+
+  const result = await prisma.$transaction(async (tnx) => {
+    await tnx.user.create({
+      data: {
+        email: req.body.admin.email,
+        password: hashPassword,
+        role: UserRole.ADMIN
+      },
+    });
+    return await tnx.admin.create({
+      data: req.body.admin,
     });
   });
   return result;
@@ -156,4 +206,5 @@ export const UserService = {
   createUserAndDoctorService,
   createPatientService,
   getAllUserDb,
+  createUserAndAdminService
 };

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { UserController } from "./user.controller";
 import { fileUploader } from "../../helpers/multer.helper";
-import { createDoctorValidationZodSchema, createUserValidationZodSchema } from "./user.validation";
+import { createAdminZodSchema, createDoctorValidationZodSchema, createUserValidationZodSchema } from "./user.validation";
 import { validZodSchemaRequest } from "../../middlewares/validZodSchemaRequest";
 import checkAuth from "../../middlewares/checkAuth";
 import { UserRole } from "@prisma/client";
@@ -27,6 +27,14 @@ router.post(
   fileUploader.upload.single("file"),
   validZodSchemaRequest(createDoctorValidationZodSchema),
   UserController.createUserAndDoctor
+);
+
+//CREATE DOCTOR
+router.post(
+  "/create-admin",
+  fileUploader.upload.single("file"),
+  validZodSchemaRequest(createAdminZodSchema),
+  UserController.createUserAndAdmin
 );
 
 export const UserRouter = router;
