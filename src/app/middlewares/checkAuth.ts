@@ -9,7 +9,7 @@ const checkAuth =
   (...roles: string[]) =>
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const token = req.cookies.accessToken;
+        const token = req.cookies.accessToken || req.headers.authorization;
         if (!token) {
           throw new AppError(httpStatus.BAD_REQUEST, "Token not found.");
         }
