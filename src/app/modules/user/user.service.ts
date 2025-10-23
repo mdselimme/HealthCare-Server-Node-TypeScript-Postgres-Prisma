@@ -6,7 +6,7 @@ import { fileUploader } from "../../helpers/multer.helper";
 import { AppError } from "../../helpers/AppError";
 import httpStatus from "http-status";
 import { calculatePagination } from "../../helpers/paginationHelpers";
-import { Prisma } from "@prisma/client";
+import { Prisma, UserRole } from "@prisma/client";
 import { userSearchableFields } from "./user.constant";
 
 // CREATE PATIENT SERVICE FUNCTION
@@ -45,6 +45,44 @@ const createPatientService = async (req: Request) => {
   return result;
 };
 
+// CREATE DOCTOR SERVICE FUNCTION
+const createUserAndDoctorService = async (req: Request) => {
+
+  if (req.file) {
+    const uploadResult = await fileUploader.uploadToCloudinary(req.file);
+    req.body.doctor.profilePhoto = uploadResult?.secure_url;
+  }
+
+  const hashPassword = await bcrypt.hash(
+    req.body.password,
+    Number(config.bcrypt_salt_round)
+  );
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: req.body.doctor.email,
+    },
+  });
+
+  if (user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Email Already Exist.");
+  }
+
+  const result = await prisma.$transaction(async (tnx) => {
+    await tnx.user.create({
+      data: {
+        email: req.body.doctor.email,
+        password: hashPassword,
+        role: UserRole.DOCTOR
+      },
+    });
+    return await tnx.doctor.create({
+      data: req.body.doctor,
+    });
+  });
+  return result;
+};
+
 //GET ALL USERS
 const getAllUserDb = async (params: any, options: any) => {
   const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options);
@@ -77,8 +115,8 @@ const getAllUserDb = async (params: any, options: any) => {
   const whereConditions: Prisma.UserWhereInput =
     andConditions.length > 0
       ? {
-          AND: andConditions,
-        }
+        AND: andConditions,
+      }
       : {};
 
   const result = await prisma.user.findMany({
@@ -93,11 +131,11 @@ const getAllUserDb = async (params: any, options: any) => {
     orderBy:
       sortBy && sortOrder
         ? {
-            [sortBy]: sortOrder,
-          }
+          [sortBy]: sortOrder,
+        }
         : {
-            createdAt: "desc",
-          },
+          createdAt: "desc",
+        },
   });
 
   const total = await prisma.user.count({
@@ -115,6 +153,7 @@ const getAllUserDb = async (params: any, options: any) => {
 };
 
 export const UserService = {
+  createUserAndDoctorService,
   createPatientService,
   getAllUserDb,
 };
