@@ -4,6 +4,7 @@ import sendResponse from "../../shared/sendResponse";
 import { Request, Response } from 'express';
 import { ScheduleService } from './schedule.service';
 import { searchQuery } from '../../helpers/searchQuery';
+import { IJwtPayload } from '../../interfaces/jwtPayload';
 
 
 // DOCTOR SCHEDULE CREATE
@@ -26,7 +27,9 @@ const doctorScheduleAll = catchAsync(async (req: Request, res: Response) => {
     const options = searchQuery(req.query, ["page", "limit", "sortBy", "sortOrder"]);
     const filter = searchQuery(req.query, ["startDateTime", "endDateTime"])
 
-    const result = await ScheduleService.doctorScheduleAll(options, filter);
+    const decodedToken = req.user;
+
+    const result = await ScheduleService.doctorScheduleAll(decodedToken as IJwtPayload, options, filter);
 
 
     sendResponse(res, {
