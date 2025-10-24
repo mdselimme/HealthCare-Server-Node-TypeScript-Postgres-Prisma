@@ -2,24 +2,14 @@ import { Request } from "express";
 import config from "../../../config";
 import { prisma } from "../../shared/prisma";
 import bcrypt from "bcryptjs";
-import { fileUploader } from "../../helpers/multer.helper";
 import { AppError } from "../../helpers/AppError";
 import httpStatus from "http-status";
 import { calculatePagination } from "../../helpers/paginationHelpers";
 import { Prisma, UserRole } from "@prisma/client";
 import { userSearchableFields } from "./user.constant";
+import { uploadImage } from "../../helpers/fileUploader";
 
-// UPLOAD IMAGE COMMON FUNCTION 
-const uploadImage = async (req: Request) => {
-  if (req.file) {
-    const uploadResult = await fileUploader.uploadToCloudinary(req.file);
-    if (!uploadResult?.secure_url) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Profile Image Upload Failed.");
-    }
-    const photoUrl = uploadResult?.secure_url;
-    return photoUrl;
-  }
-};
+
 
 //HASH PASSWORD FUNCTION
 const hashPasswordFunc = async (password: string) => {
