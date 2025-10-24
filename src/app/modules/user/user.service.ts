@@ -21,6 +21,15 @@ const uploadImage = async (req: Request) => {
   }
 };
 
+//HASH PASSWORD FUNCTION
+const hashPasswordFunc = async (password: string) => {
+  const hashPass = await bcrypt.hash(
+    password,
+    Number(config.bcrypt_salt_round)
+  );
+  return hashPass;
+};
+
 // CREATE PATIENT SERVICE FUNCTION
 const createPatientService = async (req: Request) => {
   if (req.file) {
@@ -28,10 +37,7 @@ const createPatientService = async (req: Request) => {
     req.body.patient.profilePhoto = imageUrl;
   }
 
-  const hashPassword = await bcrypt.hash(
-    req.body.password,
-    Number(config.bcrypt_salt_round)
-  );
+  const hashPassword = await hashPasswordFunc(req.body.password);
 
   const user = await prisma.user.findUnique({
     where: {
@@ -65,10 +71,7 @@ const createUserAndDoctorService = async (req: Request) => {
     req.body.doctor.profilePhoto = imageUrl;
   }
 
-  const hashPassword = await bcrypt.hash(
-    req.body.password,
-    Number(config.bcrypt_salt_round)
-  );
+  const hashPassword = await hashPasswordFunc(req.body.password);
 
   const user = await prisma.user.findUnique({
     where: {
@@ -103,10 +106,7 @@ const createUserAndAdminService = async (req: Request) => {
     req.body.admin.profilePhoto = imageUrl;
   }
 
-  const hashPassword = await bcrypt.hash(
-    req.body.password,
-    Number(config.bcrypt_salt_round)
-  );
+  const hashPassword = await hashPasswordFunc(req.body.password);
 
   const user = await prisma.user.findUnique({
     where: {
