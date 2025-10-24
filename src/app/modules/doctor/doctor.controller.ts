@@ -25,7 +25,25 @@ const getAllDoctorDB = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+// DOCTOR GET ALL DB 
+const updateDoctor = catchAsync(async (req: Request, res: Response) => {
+
+    const decodedToken = req.user;
+
+
+    const result = await DoctorServices.updateDoctor(decodedToken.email, req.body);
+
+
+    sendResponse(res, {
+        success: true,
+        message: "Update doctor Successfully",
+        data: result,
+        statusCode: httpStatus.OK,
+    });
+});
+
 
 export const DoctorController = {
-    getAllDoctorDB
+    getAllDoctorDB,
+    updateDoctor
 }

@@ -1,6 +1,8 @@
-import { Prisma } from "@prisma/client";
+import httpStatus from 'http-status';
+import { Doctor, Prisma } from "@prisma/client";
 import { calculatePagination, IOptions } from "../../helpers/paginationHelpers"
 import { prisma } from "../../shared/prisma";
+import { AppError } from "../../helpers/AppError";
 
 
 
@@ -59,10 +61,30 @@ const getAllDoctorsFromDb = async (options: IOptions, filters: any) => {
         },
         data: result,
     }
+};
 
-}
+// UPDATE DOCTOR 
+const updateDoctor = async (email: string, payload: Partial<Doctor>) => {
 
+    const doctorInfo = await prisma.doctor.findUnique({
+        where: {
+            email: email
+        }
+    });
 
+    if (!doctorInfo) {
+        throw new AppError(httpStatus.BAD_REQUEST, "doctor data does not found.")
+    }
+
+    const updatedData = await prisma.doctor.update({
+        where: {
+            id: doctorInfo.id
+        },
+        data: payload
+    });
+
+    return updatedData;
+};
 
 
 
@@ -70,5 +92,6 @@ const getAllDoctorsFromDb = async (options: IOptions, filters: any) => {
 
 
 export const DoctorServices = {
-    getAllDoctorsFromDb
+    getAllDoctorsFromDb,
+    updateDoctor
 }
