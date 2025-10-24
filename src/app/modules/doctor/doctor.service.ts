@@ -3,6 +3,7 @@ import { Doctor, Prisma } from "@prisma/client";
 import { calculatePagination, IOptions } from "../../helpers/paginationHelpers";
 import { prisma } from "../../shared/prisma";
 import { AppError } from "../../helpers/AppError";
+import { IDoctorUpdateInput } from "./doctor.interface";
 
 // GET ALL DOCTORS FROM DB
 const getAllDoctorsFromDb = async (options: IOptions, filters: any) => {
@@ -87,7 +88,10 @@ const getAllDoctorsFromDb = async (options: IOptions, filters: any) => {
 };
 
 // UPDATE DOCTOR
-const updateDoctor = async (email: string, payload: Partial<Doctor>) => {
+const updateDoctor = async (
+  email: string,
+  payload: Partial<IDoctorUpdateInput>
+) => {
   const doctorInfo = await prisma.doctor.findUnique({
     where: {
       email: email,
@@ -98,11 +102,48 @@ const updateDoctor = async (email: string, payload: Partial<Doctor>) => {
     throw new AppError(httpStatus.BAD_REQUEST, "doctor data does not found.");
   }
 
+  const { specialties, ...doctorData } = payload;
+
+  if (specialties && specialties.length > 0) {
+    const deleteSpecialtyId = specialties.filter(
+      (specialty: any) => specialty.isDeleted
+    );
+
+    for (const specialty of deleteSpecialtyId) {
+      await prisma.doctorSpecialties.deleteMany({
+        where: {
+          doctorId: doctorInfo.id,
+          specialitiesId: specialty.specialtyId,
+        },
+      });
+    }
+
+    const createSpecialtyId = specialties.filter(
+      (specialty: any) => !specialty.isDeleted
+    );
+
+    for (const specialty of createSpecialtyId) {
+      await prisma.doctorSpecialties.create({
+        data: {
+          doctorId: doctorInfo.id,
+          specialitiesId: specialty.specialtyId,
+        },
+      });
+    }
+  }
+
   const updatedData = await prisma.doctor.update({
     where: {
       id: doctorInfo.id,
     },
-    data: payload,
+    data: doctorData,
+    include: {
+      doctorSpecialties: {
+        include: {
+          specialities: true,
+        },
+      },
+    },
   });
 
   return updatedData;
