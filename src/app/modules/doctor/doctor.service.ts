@@ -104,49 +104,49 @@ const updateDoctor = async (
 
   const { specialties, ...doctorData } = payload;
 
-  if (specialties && specialties.length > 0) {
-    const deleteSpecialtyId = specialties.filter(
-      (specialty: any) => specialty.isDeleted
-    );
+  return await prisma.$transaction(async (trx) => {
+    if (specialties && specialties.length > 0) {
+      const deleteSpecialtyId = specialties.filter(
+        (specialty: any) => specialty.isDeleted
+      );
 
-    for (const specialty of deleteSpecialtyId) {
-      await prisma.doctorSpecialties.deleteMany({
-        where: {
-          doctorId: doctorInfo.id,
-          specialitiesId: specialty.specialtyId,
-        },
-      });
+      for (const specialty of deleteSpecialtyId) {
+        await trx.doctorSpecialties.deleteMany({
+          where: {
+            doctorId: doctorInfo.id,
+            specialitiesId: specialty.specialtyId,
+          },
+        });
+      }
+
+      const createSpecialtyId = specialties.filter(
+        (specialty: any) => !specialty.isDeleted
+      );
+
+      for (const specialty of createSpecialtyId) {
+        await trx.doctorSpecialties.create({
+          data: {
+            doctorId: doctorInfo.id,
+            specialitiesId: specialty.specialtyId,
+          },
+        });
+      }
     }
 
-    const createSpecialtyId = specialties.filter(
-      (specialty: any) => !specialty.isDeleted
-    );
-
-    for (const specialty of createSpecialtyId) {
-      await prisma.doctorSpecialties.create({
-        data: {
-          doctorId: doctorInfo.id,
-          specialitiesId: specialty.specialtyId,
-        },
-      });
-    }
-  }
-
-  const updatedData = await prisma.doctor.update({
-    where: {
-      id: doctorInfo.id,
-    },
-    data: doctorData,
-    include: {
-      doctorSpecialties: {
-        include: {
-          specialities: true,
+    return await trx.doctor.update({
+      where: {
+        id: doctorInfo.id,
+      },
+      data: doctorData,
+      include: {
+        doctorSpecialties: {
+          include: {
+            specialities: true,
+          },
         },
       },
-    },
+    });
   });
-
-  return updatedData;
 };
 
 export const DoctorServices = {
