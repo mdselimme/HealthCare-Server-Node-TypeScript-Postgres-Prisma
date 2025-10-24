@@ -25,34 +25,36 @@ const createDoctorSchedule = catchAsync(async (req: Request, res: Response) => {
 });
 
 // DOCTOR SCHEDULE GET 
-// const doctorScheduleAll = catchAsync(async (req: Request, res: Response) => {
+const doctorScheduleAll = catchAsync(async (req: Request, res: Response) => {
 
+    const decodedToken = req.user;
 
+    const result = await DoctorScheduleService.doctorScheduleGetAll(decodedToken as IJwtPayload);
 
-//     sendResponse(res, {
-//         success: true,
-//         message: "Schedule Retrieved Successfully",
-//         data: result,
-//         statusCode: httpStatus.CREATED,
-//     });
-// });
+    sendResponse(res, {
+        success: true,
+        message: "Doctor Schedule Retrieved Successfully",
+        data: result,
+        statusCode: httpStatus.CREATED,
+    });
+});
 
 // DOCTOR SCHEDULE GET 
-// const deleteDoctorSchedule = catchAsync(async (req: Request, res: Response) => {
+const deleteDoctorSchedule = catchAsync(async (req: Request, res: Response) => {
+
+    await DoctorScheduleService.deleteDoctorScheduleService(req.params.id);
 
 
-
-
-//     sendResponse(res, {
-//         success: true,
-//         message: "Schedule Deleted Successfully",
-//         data: null,
-//         statusCode: httpStatus.OK,
-//     });
-// });
+    sendResponse(res, {
+        success: true,
+        message: "Doctor Schedule Deleted Successfully",
+        data: null,
+        statusCode: httpStatus.OK,
+    });
+});
 
 export const DoctorScheduleController = {
     createDoctorSchedule,
-    // doctorScheduleAll,
-    // deleteDoctorSchedule
+    doctorScheduleAll,
+    deleteDoctorSchedule
 };
