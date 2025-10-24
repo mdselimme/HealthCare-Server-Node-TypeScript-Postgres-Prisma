@@ -1,5 +1,5 @@
 import { IJwtPayload } from './../../interfaces/jwtPayload';
-import { compareAsc, addMinutes, format, addHours } from "date-fns";
+import { addMinutes, format, addHours } from "date-fns";
 import { prisma } from "../../shared/prisma";
 import { calculatePagination, IOptions } from "../../helpers/paginationHelpers";
 import { Prisma } from "@prisma/client";
