@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import { handleZodError } from "../helpers/handleZodError";
 import { TErrorSources } from "../interfaces/error.types";
+import { Prisma } from "@prisma/client";
+import config from "../../config";
 
 const globalErrorHandler = (
   err: any,
@@ -20,7 +22,35 @@ const globalErrorHandler = (
 
     message = simplifiedError.message;
     errorSource = simplifiedError.errorSources as TErrorSources[];
-  } else if (error instanceof Error) {
+  }
+  else if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code = "P2002") {
+      message = "Duplicate key error.";
+      error = error.meta
+    }
+    if (error.code = "P2003") {
+      message = "Foreign key constraint error.";
+      error = error.meta
+    }
+    if (error.code = "P1000") {
+      message = "Authentication failed against database server.";
+      error = error.meta
+    }
+  }
+  else if (error instanceof Prisma.PrismaClientValidationError) {
+    message = "Prisma Validation Error";
+    error
+  }
+  else if (error instanceof Prisma.PrismaClientUnknownRequestError) {
+    message = "Unknown Prisma error.";
+    error
+  }
+  else if (error instanceof Prisma.PrismaClientInitializationError) {
+    message = "Prisma client initialization error.";
+    error
+  }
+
+  else if (error instanceof Error) {
     statusCode = 500;
     message = error.message;
   }
@@ -31,7 +61,7 @@ const globalErrorHandler = (
     message,
     error,
     errorSource,
-    stack: error.stack,
+    stack: config.node_env === "development" ? error.stack : null,
   });
 };
 
