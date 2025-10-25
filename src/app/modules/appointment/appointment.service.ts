@@ -5,7 +5,7 @@ import { prisma } from "../../shared/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { stripe } from "../../helpers/stripe";
 import { calculatePagination, IOptions } from "../../helpers/paginationHelpers";
-import { Prisma, UserRole } from "@prisma/client";
+import { AppointmentStatus, Prisma, UserRole } from "@prisma/client";
 // CREATE AN APPOINTMENT
 const createAnAppointment = async (
   decodedToken: IJwtPayload,
@@ -159,10 +159,43 @@ const getMyAppointment = async (
   };
 };
 
-// GET AI DOCTOR SUGGESTION
-const getAISuggestion = async (payload: { symptoms: string }) => {};
+// UPDATE APPOINTMENT STATUS
+const updateAppointmentStatus = async (
+  appointmentId: string,
+  status: AppointmentStatus,
+  decodedToken: IJwtPayload
+) => {
+  const appointmentData = await prisma.appointment.findUnique({
+    where: {
+      id: appointmentId,
+    },
+    include: {
+      doctor: true,
+    },
+  });
+  if (!appointmentData) {
+    throw new AppError(httpStatus.BAD_REQUEST, "No appointment data found.");
+  }
+  if (decodedToken.role === UserRole.DOCTOR) {
+    if (!(decodedToken.email === appointmentData.doctor.email))
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "This is not your appointment"
+      );
+  }
+
+  return await prisma.appointment.update({
+    where: {
+      id: appointmentId,
+    },
+    data: {
+      status,
+    },
+  });
+};
 
 export const AppointmentServices = {
   createAnAppointment,
   getMyAppointment,
+  updateAppointmentStatus,
 };

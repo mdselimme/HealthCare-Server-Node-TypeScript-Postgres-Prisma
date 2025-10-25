@@ -47,8 +47,28 @@ const getMyAppointment = catchAsync(async (req: Request, res: Response) => {
 });
 
 // UPDATE APPOINTMENT STATUS
+const updateAppointmentStatus = catchAsync(
+  async (req: Request, res: Response) => {
+    const decodedToken = req.user;
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const result = await AppointmentServices.updateAppointmentStatus(
+      id,
+      status,
+      decodedToken as IJwtPayload
+    );
+    sendResponse(res, {
+      success: true,
+      message: "Appointment Booked Successfully",
+      data: result,
+      statusCode: httpStatus.OK,
+    });
+  }
+);
 
 export const AppointmentController = {
   createAnAppointment,
   getMyAppointment,
+  updateAppointmentStatus,
 };
