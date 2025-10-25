@@ -197,8 +197,36 @@ const getAISuggestion = async (payload: { symptoms: string }) => {
   return result;
 };
 
+// GET DOCTOR BY ID
+const getDoctorById = async (id: string) => {
+  const doctor = await prisma.doctor.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      doctorSpecialties: {
+        include: {
+          specialities: true,
+        },
+      },
+      doctorSchedules: {
+        include: {
+          schedule: true,
+        },
+      },
+    },
+  });
+
+  if (!doctor) {
+    throw new AppError(httpStatus.BAD_REQUEST, "doctor data does not found.");
+  }
+
+  return doctor;
+};
+
 export const DoctorServices = {
   getAllDoctorsFromDb,
   updateDoctor,
   getAISuggestion,
+  getDoctorById,
 };

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "appointment" ALTER COLUMN "status" SET DEFAULT 'SCHEDULED',
+ALTER COLUMN "paymentStatus" SET DEFAULT 'UNPAID';

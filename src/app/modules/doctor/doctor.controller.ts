@@ -61,8 +61,21 @@ const getAISuggestion = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+//GET DOCTOR BY ID
+const getDoctorById = catchAsync(async (req: Request, res: Response) => {
+  const result = await DoctorServices.getDoctorById(req.params.id);
+
+  sendResponse(res, {
+    success: true,
+    message: "Doctor Retrieved Successfully.",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
 export const DoctorController = {
   getAllDoctorDB,
   updateDoctor,
   getAISuggestion,
+  getDoctorById,
 };

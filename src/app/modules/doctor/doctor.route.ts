@@ -7,6 +7,9 @@ const router = Router();
 
 // GET ALL DOCTORS
 router.get("/", DoctorController.getAllDoctorDB);
+
+// GET DOCTOR BY Id
+router.get("/:id", DoctorController.getDoctorById);
 // UPDATE DOCTOR
 router.patch("/", checkAuth(UserRole.DOCTOR), DoctorController.updateDoctor);
 
