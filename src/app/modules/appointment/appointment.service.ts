@@ -50,6 +50,17 @@ const createAnAppointment = async (
         isBooked: true,
       },
     });
+
+    const transactionId = `${uuidv4()}-${Date.now()}`;
+
+    await trx.payment.create({
+      data: {
+        appointmentId: appointmentData.id,
+        amount: doctorData.appointmentFee,
+        transactionId,
+      },
+    });
+
     return appointmentData;
   });
 
