@@ -5,6 +5,13 @@ import { UserRole } from "@prisma/client";
 
 const router = Router();
 
+// GET DOCTOR APPOINTMENT
+router.get(
+  "/",
+  checkAuth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+  AppointmentController.getMyAppointment
+);
+
 // CREATE APPOINTMENT
 router.post(
   "/",

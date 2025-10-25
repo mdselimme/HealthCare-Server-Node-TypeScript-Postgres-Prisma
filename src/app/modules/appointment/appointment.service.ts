@@ -4,6 +4,8 @@ import { IJwtPayload } from "../../interfaces/jwtPayload";
 import { prisma } from "../../shared/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { stripe } from "../../helpers/stripe";
+import { calculatePagination, IOptions } from "../../helpers/paginationHelpers";
+import { Prisma, UserRole } from "@prisma/client";
 // CREATE AN APPOINTMENT
 const createAnAppointment = async (
   decodedToken: IJwtPayload,
@@ -92,12 +94,75 @@ const createAnAppointment = async (
   return result;
 };
 
-// UPDATE DOCTOR
-const updateDoctor = async () => {};
+// GET MY APPOINTMENT
+const getMyAppointment = async (
+  decodedToken: IJwtPayload,
+  filters: any,
+  options: IOptions
+) => {
+  const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options);
+  const { ...filterData } = filters;
+
+  const andConditions: Prisma.AppointmentWhereInput[] = [];
+
+  if (decodedToken.role === UserRole.PATIENT) {
+    andConditions.push({
+      patient: {
+        email: decodedToken.email,
+      },
+    });
+  } else if (decodedToken.role === UserRole.DOCTOR) {
+    andConditions.push({
+      doctor: {
+        email: decodedToken.email,
+      },
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    const filterConditions = Object.keys(filterData).map((key) => ({
+      [key]: {
+        equals: (filterData as any)[key],
+      },
+    }));
+
+    andConditions.push(...filterConditions);
+  }
+
+  const whereConditions: Prisma.AppointmentWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const result = await prisma.appointment.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+    include:
+      decodedToken.role === UserRole.DOCTOR
+        ? { patient: true }
+        : { doctor: true },
+  });
+
+  const total = await prisma.appointment.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      total,
+      limit,
+      page,
+    },
+    data: result,
+  };
+};
 
 // GET AI DOCTOR SUGGESTION
 const getAISuggestion = async (payload: { symptoms: string }) => {};
 
 export const AppointmentServices = {
   createAnAppointment,
+  getMyAppointment,
 };
