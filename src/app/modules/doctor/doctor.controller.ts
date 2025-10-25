@@ -1,7 +1,6 @@
 import httpStatus from "http-status";
 import { Request, Response } from "express";
 import catchAsync from "../../shared/catchAsync";
-import { DoctorScheduleService } from "../doctorSchedule/doctorSchedule.service";
 import sendResponse from "../../shared/sendResponse";
 import { searchQuery } from "../../helpers/searchQuery";
 import { DoctorServices } from "./doctor.service";
