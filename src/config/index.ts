@@ -20,4 +20,7 @@ export default {
     refresh_token_expires: process.env.JWT_REFRESH_TOKEN_EXPIRES,
   },
   open_router_api_key: process.env.OPEN_ROUTER_API_KEY,
+  stripe_secret_key: process.env.STRIPE_SECRET_KEY,
+  client_url: process.env.CLIENT_URL,
+  web_hook_secret: process.env.WEBHOOK_SECRET,
 };
