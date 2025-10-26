@@ -71,6 +71,7 @@ const getAllDoctorsFromDb = async (options: IOptions, filters: any) => {
           specialities: true,
         },
       },
+      reviews: true,
     },
   });
 
@@ -214,6 +215,7 @@ const getDoctorById = async (id: string) => {
           schedule: true,
         },
       },
+      reviews: true,
     },
   });
 
