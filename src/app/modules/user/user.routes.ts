@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { UserController } from "./user.controller";
 import { fileUploader } from "../../helpers/multer.helper";
-import { createAdminZodSchema, createDoctorValidationZodSchema, createUserValidationZodSchema } from "./user.validation";
+import {
+  createAdminZodSchema,
+  createDoctorValidationZodSchema,
+  createUserValidationZodSchema,
+} from "./user.validation";
 import { validZodSchemaRequest } from "../../middlewares/validZodSchemaRequest";
 import checkAuth from "../../middlewares/checkAuth";
 import { UserRole } from "@prisma/client";
@@ -13,7 +17,7 @@ router.get(
   checkAuth(UserRole.ADMIN, UserRole.DOCTOR),
   UserController.getAllUser
 );
-// CREATE PATIENT 
+// CREATE PATIENT
 router.post(
   "/create-patient",
   fileUploader.upload.single("file"),
@@ -29,7 +33,7 @@ router.post(
   UserController.createUserAndDoctor
 );
 
-//CREATE DOCTOR
+//CREATE ADMIN
 router.post(
   "/create-admin",
   fileUploader.upload.single("file"),

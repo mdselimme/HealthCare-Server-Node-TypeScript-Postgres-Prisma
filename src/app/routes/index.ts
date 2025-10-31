@@ -9,6 +9,7 @@ import { AppointmentRouter } from "../modules/appointment/appointment.route";
 import { PrescriptionRouter } from "../modules/prescription/prescription.route";
 import { ReviewRouter } from "../modules/review/review.route";
 import { PatientRouter } from "../modules/patient/patient.route";
+import { MetadataRouter } from "../modules/metadata/metadata.route";
 
 const router = Router();
 
@@ -52,6 +53,10 @@ const moduleRoutes = [
   {
     path: "/review",
     route: ReviewRouter,
+  },
+  {
+    path: "/metadata",
+    route: MetadataRouter,
   },
 ];
 
