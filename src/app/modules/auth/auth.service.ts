@@ -7,7 +7,7 @@ import { Secret } from "jsonwebtoken";
 import config from "../../../config";
 import { generateToken } from "../../shared/generateToken";
 
-// CREATE PATIENT SERVICE FUNCTION
+// Auth login
 const authServerLogIn = async (payload: {
   email: string;
   password: string;
@@ -55,7 +55,15 @@ const authServerLogIn = async (payload: {
     refreshToken,
   };
 };
+// Auth logout
+const authLogOut = async () => {
+
+};
+
+
+
 
 export const AuthService = {
   authServerLogIn,
+  authLogOut
 };
