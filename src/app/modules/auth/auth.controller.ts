@@ -22,6 +22,55 @@ const userLogIn = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// REFRESH TOKEN
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+
+  const token = req.cookies.refreshToken;
+
+  const result = await AuthService.refreshToken(token);
+
+  sendResponse(res, {
+    success: true,
+    message: "Refresh token retrieved Successfully",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
+// Change Password
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+
+  sendResponse(res, {
+    success: true,
+    message: "Change Password Successfully",
+    data: null,
+    statusCode: httpStatus.OK,
+  });
+});
+
+// forgot Password
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+
+  sendResponse(res, {
+    success: true,
+    message: "Forgot token find Successfully",
+    data: null,
+    statusCode: httpStatus.OK,
+  });
+});
+
+// forgot Password
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+
+  sendResponse(res, {
+    success: true,
+    message: "Reset Password Successfully",
+    data: null,
+    statusCode: httpStatus.OK,
+  });
+});
+
+
 // AUTH Logout
 const userLogOut = catchAsync(async (req: Request, res: Response) => {
 
@@ -44,7 +93,12 @@ const userLogOut = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
 export const AuthController = {
   userLogIn,
-  userLogOut
+  userLogOut,
+  refreshToken,
+  changePassword,
+  forgotPassword,
+  resetPassword,
 };

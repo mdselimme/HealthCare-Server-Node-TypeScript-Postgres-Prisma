@@ -5,7 +5,8 @@ import { AppError } from "../../helpers/AppError";
 import httpStatus from "http-status";
 import { Secret } from "jsonwebtoken";
 import config from "../../../config";
-import { generateToken } from "../../shared/generateToken";
+import { generateToken, verifyToken } from "../../shared/generateToken";
+import { IJwtPayload } from "../../interfaces/jwtPayload";
 
 // Auth login
 const authServerLogIn = async (payload: {
@@ -55,15 +56,58 @@ const authServerLogIn = async (payload: {
     refreshToken,
   };
 };
-// Auth logout
-const authLogOut = async () => {
 
-};
+// REFRESH TOKEN
+const refreshToken = async (token: string) => {
+  const decodedToken = verifyToken(token, config.jwt.refresh_token_secret as Secret) as IJwtPayload;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: decodedToken.email,
+      status: UserStatus.ACTIVE
+    }
+  });
+
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Unauthorized user request.")
+  };
+
+  const tokenData: Partial<IJwtPayload> = {
+    userId: user.id,
+    role: user.role,
+    email: user.email
+  }
+
+  const accessToken = generateToken(tokenData, config.jwt.access_token_secret as Secret, config.jwt.access_token_expires as string);
+
+  return {
+    accessToken
+  }
+
+}
+
+// Change Password
+const changePassword = async () => {
+
+}
+
+// forgot Password
+const forgotPassword = async () => {
+
+}
+
+// reset Password
+const resetPassword = async () => {
+
+}
 
 
 
 
 export const AuthService = {
   authServerLogIn,
-  authLogOut
+  refreshToken,
+  changePassword,
+  forgotPassword,
+  resetPassword,
 };
