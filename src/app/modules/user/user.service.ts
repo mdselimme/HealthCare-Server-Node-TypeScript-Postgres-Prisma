@@ -213,7 +213,50 @@ const getMeUserFromDb = async (decodedToken: IJwtPayload) => {
     throw new AppError(httpStatus.BAD_REQUEST, "User does not found.");
   }
 
-  return user;
+  let profileData;
+
+  if (decodedToken.role === UserRole.PATIENT) {
+    profileData = await prisma.patient.findUnique({
+      where: {
+        email: decodedToken.email
+      },
+      omit: {
+        createdAt: true,
+        updatedAt: true,
+        isDeleted: true
+      }
+    })
+  }
+  else if (decodedToken.role === UserRole.DOCTOR) {
+    profileData = await prisma.doctor.findUnique({
+      where: {
+        email: decodedToken.email
+      },
+      omit: {
+        createdAt: true,
+        updatedAt: true,
+        isDeleted: true
+      }
+    })
+  }
+  else if (decodedToken.role === UserRole.ADMIN) {
+    profileData = await prisma.admin.findUnique({
+      where: {
+        email: decodedToken.email
+      },
+      omit: {
+        createdAt: true,
+        updatedAt: true,
+        isDeleted: true
+      }
+    })
+  }
+
+  return {
+    ...user,
+    ...profileData
+  };
+
 };
 
 export const UserService = {
