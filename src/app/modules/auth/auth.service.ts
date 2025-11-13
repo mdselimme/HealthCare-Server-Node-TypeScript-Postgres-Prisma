@@ -125,7 +125,27 @@ const changePassword = async (decodedToken: IJwtPayload, payload: { newPassword:
 }
 
 // forgot Password
-const forgotPassword = async () => {
+const forgotPassword = async (payload: { email: string }) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      email: payload.email
+    }
+  })
+
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User does not found! Give right email.")
+  }
+
+  const tokenData: Partial<IJwtPayload> = {
+    userId: user.id,
+    role: user.role,
+    email: user.email
+  }
+
+  const forgotPasswordToken = generateToken(tokenData, config.jwt.forgot_password_token_secret as Secret, config.jwt.forgot_password_token_expires as string);
+
+
+
 
 }
 

@@ -5,6 +5,7 @@ import httpStatus from "http-status";
 import { AuthService } from "./auth.service";
 import { setTokenInCookie } from "../../shared/setTokinCookie";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
+import { AppError } from "../../helpers/AppError";
 
 // AUTH LOGIN
 const userLogIn = catchAsync(async (req: Request, res: Response) => {
@@ -56,6 +57,8 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 // forgot Password
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
 
+  const result = await AuthService.forgotPassword(req.body);
+
   sendResponse(res, {
     success: true,
     message: "Forgot token find Successfully",
@@ -66,6 +69,12 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
 
 // forgot Password
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
+
+  const token = req.headers.authorization;
+
+  if (!token) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Reset password token does not found.")
+  }
 
   sendResponse(res, {
     success: true,
