@@ -4,6 +4,7 @@ import sendResponse from "../../shared/sendResponse";
 import httpStatus from "http-status";
 import { AuthService } from "./auth.service";
 import { setTokenInCookie } from "../../shared/setTokinCookie";
+import { IJwtPayload } from "../../interfaces/jwtPayload";
 
 // AUTH LOGIN
 const userLogIn = catchAsync(async (req: Request, res: Response) => {
@@ -40,10 +41,14 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 // Change Password
 const changePassword = catchAsync(async (req: Request, res: Response) => {
 
+  const decodedToken = req.user;
+
+  const result = await AuthService.changePassword(decodedToken as IJwtPayload, req.body)
+
   sendResponse(res, {
     success: true,
     message: "Change Password Successfully",
-    data: null,
+    data: result,
     statusCode: httpStatus.OK,
   });
 });

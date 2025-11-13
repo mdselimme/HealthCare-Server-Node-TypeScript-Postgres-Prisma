@@ -87,7 +87,40 @@ const refreshToken = async (token: string) => {
 }
 
 // Change Password
-const changePassword = async () => {
+const changePassword = async (decodedToken: IJwtPayload, payload: { newPassword: string; oldPassword: string }) => {
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: decodedToken.email
+    }
+  })
+
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User not authorized.")
+  }
+
+  const IsOldPassMatch = await bcrypt.compare(payload.oldPassword, user.password);
+
+
+  if (!IsOldPassMatch) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Old password does not match.")
+  };
+
+  const hashPassword = await bcrypt.hash(payload.newPassword, Number(config.bcrypt_salt_round));
+
+  await prisma.user.update({
+    where: {
+      email: decodedToken.email
+    },
+    data: {
+      password: hashPassword,
+      needPasswordChange: false
+    }
+  })
+
+  return {
+    message: "Password Changed Successfully."
+  }
 
 }
 
