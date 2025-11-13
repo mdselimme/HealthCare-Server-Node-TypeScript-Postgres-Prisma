@@ -76,6 +76,8 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Reset password token does not found.")
   }
 
+  const result = await AuthService.resetPassword(token, req.body)
+
   sendResponse(res, {
     success: true,
     message: "Reset Password Successfully",

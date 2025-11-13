@@ -145,14 +145,46 @@ const forgotPassword = async (payload: { email: string }) => {
   const forgotPasswordToken = generateToken(tokenData, config.jwt.forgot_password_token_secret as Secret, config.jwt.forgot_password_token_expires as string);
 
 
-
-
 }
 
 // reset Password
-const resetPassword = async () => {
+const resetPassword = async (token: string, payload: { password: string }) => {
 
-}
+  const verified = verifyToken(token, config.jwt.forgot_password_token_secret as Secret);
+
+  if (!verified) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Reset Password token is not valid.")
+  };
+
+  const decodedToken = verified as IJwtPayload;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: decodedToken.userId,
+      status: UserStatus.ACTIVE
+    }
+  })
+
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User does not found!")
+  }
+
+  const hashPassword = await bcrypt.hash(payload.password, Number(config.bcrypt_salt_round));
+
+  await prisma.user.update({
+    where: {
+      email: decodedToken.email
+    },
+    data: {
+      password: hashPassword,
+      needPasswordChange: false
+    }
+  })
+
+  return {
+    message: "Password reset successfully."
+  }
+};
 
 
 
