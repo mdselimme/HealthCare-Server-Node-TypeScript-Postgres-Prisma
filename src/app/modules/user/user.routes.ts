@@ -11,12 +11,19 @@ import checkAuth from "../../middlewares/checkAuth";
 import { UserRole } from "@prisma/client";
 
 const router = Router();
-
+// GET ALL USER 
 router.get(
   "/",
   checkAuth(UserRole.ADMIN, UserRole.DOCTOR),
   UserController.getAllUser
 );
+
+// GET ME USER 
+router.get('/me',
+  checkAuth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+  UserController.getMeUserFromDb
+)
+
 // CREATE PATIENT
 router.post(
   "/create-patient",

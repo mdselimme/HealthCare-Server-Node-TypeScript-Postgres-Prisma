@@ -4,6 +4,7 @@ import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { UserService } from "./user.service";
 import { searchQuery } from "../../helpers/searchQuery";
+import { IJwtPayload } from "../../interfaces/jwtPayload";
 
 // CREATE PATIENT
 const createPatient = catchAsync(async (req: Request, res: Response) => {
@@ -43,6 +44,21 @@ const createUserAndAdmin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// GET ME USER
+const getMeUserFromDb = catchAsync(async (req: Request, res: Response) => {
+
+  const decodedToken = req.user;
+
+  const result = await UserService.getMeUserFromDb(decodedToken as IJwtPayload);
+
+  sendResponse(res, {
+    success: true,
+    message: "Me User Retrieved Successfully.",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
 // GET ALL USER
 const getAllUser = catchAsync(async (req: Request, res: Response) => {
 
@@ -73,5 +89,6 @@ export const UserController = {
   createPatient,
   getAllUser,
   createUserAndDoctor,
-  createUserAndAdmin
+  createUserAndAdmin,
+  getMeUserFromDb
 };

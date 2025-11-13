@@ -5,9 +5,10 @@ import bcrypt from "bcryptjs";
 import { AppError } from "../../helpers/AppError";
 import httpStatus from "http-status";
 import { calculatePagination } from "../../helpers/paginationHelpers";
-import { Prisma, UserRole } from "@prisma/client";
+import { Prisma, UserRole, UserStatus } from "@prisma/client";
 import { userSearchableFields } from "./user.constant";
 import { uploadImage } from "../../helpers/fileUploader";
+import { IJwtPayload } from "../../interfaces/jwtPayload";
 
 
 
@@ -192,9 +193,33 @@ const getAllUserDb = async (params: any, options: any) => {
   };
 };
 
+//GET ME USER
+const getMeUserFromDb = async (decodedToken: IJwtPayload) => {
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: decodedToken.userId,
+      status: UserStatus.ACTIVE
+    },
+    omit: {
+      password: true,
+      needPasswordChange: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  });
+
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User does not found.");
+  }
+
+  return user;
+};
+
 export const UserService = {
   createUserAndDoctorService,
   createPatientService,
   getAllUserDb,
-  createUserAndAdminService
+  createUserAndAdminService,
+  getMeUserFromDb
 };
