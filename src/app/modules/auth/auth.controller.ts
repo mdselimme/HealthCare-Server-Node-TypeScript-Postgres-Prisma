@@ -6,6 +6,7 @@ import { AuthService } from "./auth.service";
 import { setTokenInCookie } from "../../shared/setTokenCookie";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
 import { AppError } from "../../helpers/AppError";
+import { get } from "http";
 
 // AUTH LOGIN
 const userLogIn = catchAsync(async (req: Request, res: Response) => {
@@ -132,4 +133,5 @@ export const AuthController = {
   changePassword,
   forgotPassword,
   resetPassword,
+  getMeAuth
 };
