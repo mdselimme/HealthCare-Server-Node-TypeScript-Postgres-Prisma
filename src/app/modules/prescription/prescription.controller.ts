@@ -4,6 +4,7 @@ import sendResponse from "../../shared/sendResponse";
 import httpStatus from "http-status";
 import { PrescriptionService } from "./prescription.service";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
+import { searchQuery } from "../../helpers/searchQuery";
 
 const createPrescription = catchAsync(async (req: Request, res: Response) => {
   const decodedToken = req.user;
@@ -21,6 +22,23 @@ const createPrescription = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// GET PRESCRIPTION BY PATIENT 
+const getPrescriptionsByPatient = catchAsync(async (req: Request, res: Response) => {
+  const decodedToken = req.user;
+  const options = searchQuery(req.query, ['limit', 'page', 'sortBy', 'sortOrder'])
+  const result = await PrescriptionService.getPrescriptionsByPatient(
+    decodedToken as IJwtPayload,
+    options
+  );
+  sendResponse(res, {
+    success: true,
+    message: "Patient's prescriptions retrieved successfully.",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
 export const PrescriptionController = {
   createPrescription,
+  getPrescriptionsByPatient
 };

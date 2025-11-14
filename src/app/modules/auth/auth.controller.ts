@@ -96,7 +96,7 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 
   sendResponse(res, {
     success: true,
-    message: "Reset Password Successfully",
+    message: result.message,
     data: null,
     statusCode: httpStatus.OK,
   });
