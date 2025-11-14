@@ -4,6 +4,11 @@ import checkAuth from "../../middlewares/checkAuth";
 import { UserRole } from "@prisma/client";
 
 const router = Router();
+
+// USER GET 
+router.get("/me",
+    checkAuth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+    AuthController.getMeAuth);
 // USER LOGIN 
 router.post("/login", AuthController.userLogIn);
 // USER REFRESH TOKEN 

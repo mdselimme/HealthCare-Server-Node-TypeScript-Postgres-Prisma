@@ -1,3 +1,4 @@
+import { addHours } from 'date-fns';
 import { UserStatus } from "@prisma/client";
 import { prisma } from "../../shared/prisma";
 import bcrypt from "bcryptjs";
@@ -56,6 +57,28 @@ const authServerLogIn = async (payload: {
     refreshToken,
   };
 };
+
+//GET ME AUTH
+const getMeAuth = async (decodedToken: IJwtPayload) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: decodedToken.userId,
+      status: UserStatus.ACTIVE
+    },
+    omit: {
+      password: true,
+      needPasswordChange: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  });
+
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User does not found.");
+  }
+
+  return user;
+}
 
 // REFRESH TOKEN
 const refreshToken = async (token: string) => {
@@ -195,4 +218,5 @@ export const AuthService = {
   changePassword,
   forgotPassword,
   resetPassword,
+  getMeAuth
 };

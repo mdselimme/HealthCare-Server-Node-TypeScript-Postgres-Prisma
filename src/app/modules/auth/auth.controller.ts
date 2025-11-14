@@ -24,6 +24,21 @@ const userLogIn = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// GET ME AUTH 
+const getMeAuth = catchAsync(async (req: Request, res: Response) => {
+
+  const decodedToken = req.user;
+
+  const result = await AuthService.getMeAuth(decodedToken as IJwtPayload);
+
+  sendResponse(res, {
+    success: true,
+    message: "Get Me Auth Successfully",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
 // REFRESH TOKEN
 const refreshToken = catchAsync(async (req: Request, res: Response) => {
 
