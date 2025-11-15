@@ -21,6 +21,20 @@ const getPatientData = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// SOFT DELETE PATIENT
+const softDeletePatient = catchAsync(async (req: Request, res: Response) => {
+  const patientId = req.params.id;
+
+  const result = await PatientServices.softDeletePatient(patientId);
+  sendResponse(res, {
+    success: true,
+    message: "Patient soft deleted successfully",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
 export const PatientController = {
   getPatientData,
+  softDeletePatient,
 };

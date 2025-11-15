@@ -1,3 +1,4 @@
+import { UserStatus } from "@prisma/client";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
 import { prisma } from "../../shared/prisma";
 
@@ -12,6 +13,35 @@ const getPatientData = async (decodedToken: IJwtPayload) => {
   return patient;
 };
 
+// PATIENT SOFT DELETE SERVICE
+const softDeletePatient = async (patientId: string) => {
+
+  return await prisma.$transaction(async (trx) => {
+
+    const deletedPatient = await trx.patient.update({
+      where: {
+        id: patientId,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+
+    await trx.user.updateMany({
+      where: {
+        email: deletedPatient.email,
+      },
+      data: {
+        status: UserStatus.DELETED,
+      },
+    });
+
+    return deletedPatient;
+  })
+
+};
+
 export const PatientServices = {
   getPatientData,
+  softDeletePatient
 };
