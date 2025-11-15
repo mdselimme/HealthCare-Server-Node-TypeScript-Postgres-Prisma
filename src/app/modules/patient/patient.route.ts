@@ -10,6 +10,11 @@ router.get("/",
     checkAuth(UserRole.PATIENT),
     PatientController.getPatientData);
 
+// GET PATIENT BY ID 
+router.get("/:id",
+    checkAuth(UserRole.ADMIN, UserRole.DOCTOR),
+    PatientController.getPatientById);
+
 //SOFT DELETE PATIENT ROUTE
 router.delete("/soft/:id",
     checkAuth(UserRole.ADMIN),

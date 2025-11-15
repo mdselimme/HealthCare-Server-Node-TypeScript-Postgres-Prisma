@@ -1,6 +1,8 @@
+import httpStatus from 'http-status';
 import { UserStatus } from "@prisma/client";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
 import { prisma } from "../../shared/prisma";
+import { AppError } from "../../helpers/AppError";
 
 const getPatientData = async (decodedToken: IJwtPayload) => {
   const patient = await prisma.patient.findUnique({
@@ -9,6 +11,25 @@ const getPatientData = async (decodedToken: IJwtPayload) => {
       isDeleted: false,
     },
   });
+
+  return patient;
+};
+
+
+// GET PATIENT BY ID SERVICE
+const getPatientById = async (patientId: string) => {
+
+  const patient = await prisma.patient.findUnique({
+    where: {
+      id: patientId,
+      isDeleted: false,
+    },
+  });
+
+  if (!patient) {
+    throw new AppError(httpStatus.NOT_FOUND
+      , "Patient not found");
+  }
 
   return patient;
 };
@@ -41,7 +62,9 @@ const softDeletePatient = async (patientId: string) => {
 
 };
 
+
 export const PatientServices = {
   getPatientData,
-  softDeletePatient
+  softDeletePatient,
+  getPatientById
 };
