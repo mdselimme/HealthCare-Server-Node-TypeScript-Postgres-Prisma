@@ -21,6 +21,13 @@ export default {
     forgot_password_token_secret: process.env.FORGOT_PASS_TOKEN_SECRET,
     forgot_password_token_expires: process.env.FORGOT_PASS_TOKEN_EXPIRES,
   },
+  smtp: {
+    email_sender_service: process.env.SMTP_EMAIL_SENDER_SERVICE,
+    email_sender_user: process.env.SMTP_EMAIL_SENDER_USER,
+    email_sender_password: process.env.SMTP_EMAIL_SENDER_PASSWORD,
+    email_sender_host: process.env.SMTP_EMAIL_SENDER_HOST,
+    email_sender_port: process.env.SMTP_EMAIL_SENDER_PORT,
+  },
   open_router_api_key: process.env.OPEN_ROUTER_API_KEY,
   stripe_secret_key: process.env.STRIPE_SECRET_KEY,
   client_url: process.env.CLIENT_URL,
