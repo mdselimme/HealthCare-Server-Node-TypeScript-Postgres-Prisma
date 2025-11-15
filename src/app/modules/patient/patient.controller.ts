@@ -4,13 +4,18 @@ import { PatientServices } from "./patient.service";
 import sendResponse from "../../shared/sendResponse";
 import httpStatus from "http-status";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
+import { searchQuery } from "../../helpers/searchQuery";
+import { patientFilterableFields } from "./patient.constant";
 
 // GET PATIENT DATA
-const getPatientData = catchAsync(async (req: Request, res: Response) => {
-  const decodedToken = req.user;
+const getAllPatientData = catchAsync(async (req: Request, res: Response) => {
 
-  const result = await PatientServices.getPatientData(
-    decodedToken as IJwtPayload
+  const filters = searchQuery(req.query, patientFilterableFields);
+  const options = searchQuery(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+
+  const result = await PatientServices.getAllPatientData(
+    filters,
+    options
   );
 
   sendResponse(res, {
@@ -47,7 +52,7 @@ const getPatientById = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const PatientController = {
-  getPatientData,
+  getAllPatientData,
   softDeletePatient,
   getPatientById
 };

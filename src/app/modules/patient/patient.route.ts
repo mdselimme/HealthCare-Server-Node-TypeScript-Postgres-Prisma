@@ -7,8 +7,8 @@ const router = Router();
 
 // GET PATIENT DATA ROUTE
 router.get("/",
-    checkAuth(UserRole.PATIENT),
-    PatientController.getPatientData);
+    checkAuth(UserRole.ADMIN),
+    PatientController.getAllPatientData);
 
 // GET PATIENT BY ID 
 router.get("/:id",
