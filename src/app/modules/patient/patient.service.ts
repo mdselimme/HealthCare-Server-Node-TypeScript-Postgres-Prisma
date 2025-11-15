@@ -68,6 +68,66 @@ const getAllPatientData = async (filters: IPatientFilter, options: IOptions) => 
 
 
 // GET PATIENT BY ID SERVICE
+const updatePatient = async (decodedToken: IJwtPayload, payload: any) => {
+
+  const { medicalReport, patientHealthData, ...patientData } = payload;
+
+  const patientInfo = await prisma.patient.findUnique({
+    where: {
+      email: decodedToken.email,
+      isDeleted: false,
+    },
+  });
+
+  if (!patientInfo) {
+    throw new AppError(httpStatus.NOT_FOUND, "Patient not found");
+  }
+
+  return await prisma.$transaction(async (trx) => {
+    await trx.patient.update({
+      where: {
+        id: patientInfo.id
+      },
+      data: patientData
+    })
+
+    if (patientHealthData) {
+      await trx.patientHealthData.upsert({
+        where: {
+          patientId: patientInfo.id
+        },
+        update: patientHealthData,
+        create: {
+          ...patientHealthData,
+          patientId: patientInfo.id
+        }
+      })
+    }
+
+    if (medicalReport) {
+      await trx.medicalReport.create({
+        data: {
+          ...medicalReport,
+          patientId: patientInfo.id
+        }
+      })
+    }
+
+    const result = await trx.patient.findUnique({
+      where: {
+        id: patientInfo.id
+      },
+      include: {
+        patientHealthData: true,
+        medicalReports: true
+      }
+    })
+    return result;
+  })
+
+};
+
+// GET PATIENT BY ID SERVICE
 const getPatientById = async (patientId: string) => {
 
   const patient = await prisma.patient.findUnique({
@@ -117,5 +177,6 @@ const softDeletePatient = async (patientId: string) => {
 export const PatientServices = {
   getAllPatientData,
   softDeletePatient,
-  getPatientById
+  getPatientById,
+  updatePatient
 };

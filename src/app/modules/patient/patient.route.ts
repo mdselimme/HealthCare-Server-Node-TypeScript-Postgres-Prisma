@@ -15,6 +15,11 @@ router.get("/:id",
     checkAuth(UserRole.ADMIN, UserRole.DOCTOR),
     PatientController.getPatientById);
 
+// PATIENT UPDATE ROUTE
+router.patch("/:id",
+    checkAuth(UserRole.PATIENT),
+    PatientController.updatePatient);
+
 //SOFT DELETE PATIENT ROUTE
 router.delete("/soft/:id",
     checkAuth(UserRole.ADMIN),
