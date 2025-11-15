@@ -8,6 +8,7 @@ export default {
   port: process.env.PORT,
   database_url: process.env.DATABASE_URL,
   bcrypt_salt_round: process.env.BCRYPT_SALT_ROUND,
+  frontend_url: process.env.FRONTEND_URL,
   cloudinary: {
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,

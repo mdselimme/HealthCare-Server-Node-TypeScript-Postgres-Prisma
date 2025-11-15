@@ -77,7 +77,7 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
 
   sendResponse(res, {
     success: true,
-    message: "Forgot token find Successfully",
+    message: "Forgot Password email sent Successfully",
     data: result,
     statusCode: httpStatus.OK,
   });

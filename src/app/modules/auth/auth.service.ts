@@ -8,6 +8,8 @@ import { Secret } from "jsonwebtoken";
 import config from "../../../config";
 import { generateToken, verifyToken } from "../../shared/generateToken";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
+import { sendEmail } from '../../shared/sendEmail';
+import { name } from 'ejs';
 
 // Auth login
 const authServerLogIn = async (payload: {
@@ -151,7 +153,8 @@ const changePassword = async (decodedToken: IJwtPayload, payload: { newPassword:
 const forgotPassword = async (payload: { email: string }) => {
   const user = await prisma.user.findUnique({
     where: {
-      email: payload.email
+      email: payload.email,
+      status: UserStatus.ACTIVE
     }
   })
 
@@ -167,7 +170,16 @@ const forgotPassword = async (payload: { email: string }) => {
 
   const forgotPasswordToken = generateToken(tokenData, config.jwt.forgot_password_token_secret as Secret, config.jwt.forgot_password_token_expires as string);
 
+  const resetUiLink = `${config.frontend_url}/reset-password?id=${user.id}&token=${forgotPasswordToken}`;
 
+  await sendEmail({
+    to: user.email,
+    subject: "Forgot Password - Reset your password",
+    templateName: "forgotPassword",
+    templateData: {
+      resetUiLink
+    }
+  });
 }
 
 // reset Password
