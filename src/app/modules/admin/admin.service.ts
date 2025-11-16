@@ -122,8 +122,42 @@ const softDeleteAdminById = async (id: string) => {
     return result;
 };
 
+// DELETE ADMIN DATA BY ID 
+const deleteAdminById = async (id: string) => {
+    const admin = await prisma.admin.findUnique({
+        where: {
+            id,
+            isDeleted: false
+        }
+    });
+
+    if (!admin) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Admin data not found');
+    }
+
+    const result = await prisma.$transaction(async (trx) => {
+
+        const adminDataDeleted = await trx.admin.delete({
+            where: {
+                id
+            }
+        });
+
+        await trx.user.delete({
+            where: {
+                email: adminDataDeleted.email
+            },
+        });
+
+        return adminDataDeleted;
+    });
+
+    return result;
+};
+
 export const AdminService = {
     getAllAdminData,
     getAdminById,
-    softDeleteAdminById
+    softDeleteAdminById,
+    deleteAdminById
 }
