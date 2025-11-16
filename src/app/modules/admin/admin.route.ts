@@ -18,10 +18,10 @@ router.get("/:id",
     AdminController.getAdminById
 );
 
-//DELETE ADMIN DATA BY ID
-router.delete("/:id",
+//SOFT DELETE ADMIN DATA BY ID
+router.delete("/soft/:id",
     checkAuth(UserRole.ADMIN),
-    AdminController.deleteAdminById
+    AdminController.softDeleteAdminById
 );
 
 

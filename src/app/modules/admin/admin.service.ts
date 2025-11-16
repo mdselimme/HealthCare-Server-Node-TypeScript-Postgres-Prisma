@@ -82,8 +82,8 @@ const getAdminById = async (id: string) => {
     return admin;
 };
 
-// DELETE ADMIN DATA BY ID 
-const deleteAdminById = async (id: string) => {
+// SOFT DELETE ADMIN DATA BY ID 
+const softDeleteAdminById = async (id: string) => {
 
     const admin = await prisma.admin.findUnique({
         where: {
@@ -125,5 +125,5 @@ const deleteAdminById = async (id: string) => {
 export const AdminService = {
     getAllAdminData,
     getAdminById,
-    deleteAdminById
+    softDeleteAdminById
 }
