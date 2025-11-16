@@ -82,6 +82,33 @@ const getAdminById = async (id: string) => {
     return admin;
 };
 
+
+// ADMIN DATA UPDATE BY ID 
+const updateAdminDataById = async (id: string, payload: Partial<Prisma.AdminUpdateInput>) => {
+
+    const admin = await prisma.admin.findUnique({
+        where: {
+            id,
+            isDeleted: false
+        }
+    });
+
+    if (!admin) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Admin data not found');
+    }
+
+    const result = await prisma.admin.update({
+        where: {
+            id
+        },
+        data: payload
+    });
+
+    return result;
+};
+
+
+
 // SOFT DELETE ADMIN DATA BY ID 
 const softDeleteAdminById = async (id: string) => {
 
@@ -158,6 +185,7 @@ const deleteAdminById = async (id: string) => {
 export const AdminService = {
     getAllAdminData,
     getAdminById,
+    updateAdminDataById,
     softDeleteAdminById,
     deleteAdminById
 }

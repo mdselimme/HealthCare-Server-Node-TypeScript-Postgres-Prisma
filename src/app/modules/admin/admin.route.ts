@@ -18,6 +18,12 @@ router.get("/:id",
     AdminController.getAdminById
 );
 
+// ADMIN DATA UPDATE BY ID 
+router.patch("/:id",
+    checkAuth(UserRole.ADMIN),
+    AdminController.updateAdminDataById
+);
+
 //SOFT DELETE ADMIN DATA BY ID
 router.delete("/soft/:id",
     checkAuth(UserRole.ADMIN),
