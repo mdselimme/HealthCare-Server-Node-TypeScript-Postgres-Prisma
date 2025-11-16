@@ -10,6 +10,7 @@ import { PrescriptionRouter } from "../modules/prescription/prescription.route";
 import { ReviewRouter } from "../modules/review/review.route";
 import { PatientRouter } from "../modules/patient/patient.route";
 import { MetadataRouter } from "../modules/metadata/metadata.route";
+import { AdminRouter } from "../modules/admin/admin.route";
 
 const router = Router();
 
@@ -21,6 +22,10 @@ const moduleRoutes = [
   {
     path: "/auth",
     route: AuthRouter,
+  },
+  {
+    path: "/admin",
+    route: AdminRouter,
   },
   {
     path: "/schedule",
