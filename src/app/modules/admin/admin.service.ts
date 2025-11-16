@@ -1,9 +1,10 @@
-import { get } from 'http';
+import httpStatus from 'http-status';
 import { calculatePagination, IOptions } from '../../helpers/paginationHelpers';
 import { IAdminFilter } from './admin.interface';
 import { Prisma } from '@prisma/client';
 import { adminSearchAbleFields } from './admin.constant';
 import { prisma } from '../../shared/prisma';
+import { AppError } from '../../helpers/AppError';
 
 
 // GET ALL ADMIN DATA 
@@ -65,8 +66,23 @@ const getAllAdminData = async (filters: IAdminFilter, options: IOptions) => {
     }
 };
 
+// GET ADMIN DATA BY ID
+const getAdminById = async (id: string) => {
+    const admin = await prisma.admin.findUnique({
+        where: {
+            id,
+            isDeleted: false
+        }
+    });
 
+    if (!admin) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Admin data not found');
+    }
+
+    return admin;
+};
 
 export const AdminService = {
-    getAllAdminData
+    getAllAdminData,
+    getAdminById
 }

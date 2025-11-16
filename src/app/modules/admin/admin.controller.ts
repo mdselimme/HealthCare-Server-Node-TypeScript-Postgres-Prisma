@@ -21,9 +21,22 @@ const getAllAdminData = catchAsync(async (req: Request, res: Response) => {
         message: "Admin data fetched successfully",
         data: result
     })
+});
 
-})
+// GET ADMIN DATA BY ID
+const getAdminById = catchAsync(async (req: Request, res: Response) => {
+
+    const result = await AdminService.getAdminById(req.params.id);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Admin data fetched successfully",
+        data: result
+    })
+});
 
 export const AdminController = {
-    getAllAdminData
+    getAllAdminData,
+    getAdminById
 }
