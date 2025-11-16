@@ -6,6 +6,7 @@ import sendResponse from "../../shared/sendResponse"
 import { AdminService } from './admin.service';
 import { searchQuery } from '../../helpers/searchQuery';
 import { adminFilterableFields } from './admin.constant';
+import { de } from 'zod/v4/locales';
 
 // GET ALL ADMIN DATA 
 const getAllAdminData = catchAsync(async (req: Request, res: Response) => {
@@ -36,7 +37,21 @@ const getAdminById = catchAsync(async (req: Request, res: Response) => {
     })
 });
 
+// DELETE ADMIN DATA BY ID
+const deleteAdminById = catchAsync(async (req: Request, res: Response) => {
+
+    const result = await AdminService.deleteAdminById(req.params.id);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Admin data deleted successfully",
+        data: result
+    })
+});
+
 export const AdminController = {
     getAllAdminData,
-    getAdminById
+    getAdminById,
+    deleteAdminById
 }

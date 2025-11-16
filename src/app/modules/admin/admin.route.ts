@@ -18,5 +18,11 @@ router.get("/:id",
     AdminController.getAdminById
 );
 
+//DELETE ADMIN DATA BY ID
+router.delete("/:id",
+    checkAuth(UserRole.ADMIN),
+    AdminController.deleteAdminById
+);
+
 
 export const AdminRouter = router;
