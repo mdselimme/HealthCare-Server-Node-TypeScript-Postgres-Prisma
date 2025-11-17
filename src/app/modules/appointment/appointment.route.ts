@@ -5,9 +5,17 @@ import { UserRole } from "@prisma/client";
 
 const router = Router();
 
-// GET DOCTOR APPOINTMENT
+// GET ALL APPOINTMENT 
 router.get(
   "/",
+  checkAuth(UserRole.ADMIN),
+  AppointmentController.getAllAppointment
+);
+
+
+// GET MY APPOINTMENT
+router.get(
+  "/my-appointments",
   checkAuth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
   AppointmentController.getMyAppointment
 );
@@ -20,8 +28,8 @@ router.post(
 );
 // UPDATE APPOINTMENT
 router.patch(
-  "/:id",
-  checkAuth(UserRole.ADMIN, UserRole.PATIENT, UserRole.DOCTOR),
+  "/status/:id",
+  checkAuth(UserRole.ADMIN, UserRole.DOCTOR),
   AppointmentController.updateAppointmentStatus
 );
 

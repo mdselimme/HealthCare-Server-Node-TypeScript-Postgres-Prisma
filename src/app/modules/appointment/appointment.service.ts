@@ -6,13 +6,13 @@ import { v4 as uuidv4 } from "uuid";
 import { stripe } from "../../helpers/stripe";
 import { calculatePagination, IOptions } from "../../helpers/paginationHelpers";
 import { AppointmentStatus, Prisma, UserRole } from "@prisma/client";
-import { off } from "process";
+
 // CREATE AN APPOINTMENT
 const createAnAppointment = async (
   decodedToken: IJwtPayload,
   payload: { doctorId: string; scheduleId: string }
 ) => {
-  console.log({ decodedToken, payload });
+
   const patientData = await prisma.patient.findUniqueOrThrow({
     where: {
       email: decodedToken.email,
@@ -93,6 +93,66 @@ const createAnAppointment = async (
   });
 
   return result;
+};
+
+// GET ALL APPOINTMENT
+const getAllAppointment = async (
+  filters: any,
+  options: IOptions
+) => {
+  const { page, limit, skip } = calculatePagination(options);
+  const { patientEmail, doctorEmail, ...filterData } = filters;
+
+  const andConditions: Prisma.AppointmentWhereInput[] = [];
+  if (patientEmail) {
+    andConditions.push({
+      patient: {
+        email: patientEmail,
+      },
+    });
+  }
+  if (doctorEmail) {
+    andConditions.push({
+      doctor: {
+        email: doctorEmail,
+      },
+    });
+  };
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => {
+        return {
+          [key]: {
+            equals: (filterData as any)[key],
+          },
+        };
+      }),
+    });
+  }
+
+  const whereConditions: Prisma.AppointmentWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const result = await prisma.appointment.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy: options.sortBy && options.sortOrder ? {
+      [options.sortBy]: options.sortOrder,
+    } : { createdAt: 'desc' },
+    include: { patient: true, doctor: true },
+  });
+  const total = await prisma.appointment.count({
+    where: whereConditions,
+  });
+  return {
+    meta: {
+      total,
+      limit,
+      page,
+    },
+    data: result,
+  };
 };
 
 // GET MY APPOINTMENT
@@ -246,4 +306,5 @@ export const AppointmentServices = {
   getMyAppointment,
   updateAppointmentStatus,
   cancelUnpaidAppointment,
+  getAllAppointment
 };

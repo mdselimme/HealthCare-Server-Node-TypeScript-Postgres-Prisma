@@ -5,6 +5,7 @@ import sendResponse from "../../shared/sendResponse";
 import { AppointmentServices } from "./appointment.service";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
 import { searchQuery } from "../../helpers/searchQuery";
+import { appointSearchQueryFields } from "./appointment.constant";
 
 // CREATE AN APPOINTMENT
 const createAnAppointment = catchAsync(async (req: Request, res: Response) => {
@@ -22,7 +23,27 @@ const createAnAppointment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// GET ALL APPOINTMENT
+//GET ALL APPOINTMENT
+const getAllAppointment = catchAsync(async (req: Request, res: Response) => {
+
+  const options = searchQuery(req.query, ["page", "limit", "sortBy", "sortOrder"]);
+  const filters = searchQuery(req.query, appointSearchQueryFields);
+
+  const result = await AppointmentServices.getAllAppointment(
+    filters,
+    options
+  );
+
+
+  sendResponse(res, {
+    success: true,
+    message: "Appointments Retrieved Successfully",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+})
+
+// GET MY APPOINTMENT
 const getMyAppointment = catchAsync(async (req: Request, res: Response) => {
   const options = searchQuery(req.query, [
     "page",
@@ -30,12 +51,12 @@ const getMyAppointment = catchAsync(async (req: Request, res: Response) => {
     "sortBy",
     "sortOrder",
   ]);
-  const fillters = searchQuery(req.query, ["status", "paymentStatus"]);
+  const filters = searchQuery(req.query, appointSearchQueryFields);
   const decodedToken = req.user;
 
   const result = await AppointmentServices.getMyAppointment(
     decodedToken as IJwtPayload,
-    fillters,
+    filters,
     options
   );
   sendResponse(res, {
@@ -71,4 +92,5 @@ export const AppointmentController = {
   createAnAppointment,
   getMyAppointment,
   updateAppointmentStatus,
+  getAllAppointment
 };
