@@ -259,10 +259,33 @@ const getMeUserFromDb = async (decodedToken: IJwtPayload) => {
 
 };
 
+// UPDATE USER STATUS SERVICE 
+const updateUserStatusService = async (id: string, status: UserStatus) => {
+
+  const user = await prisma.user.findUnique({
+    where: { id }
+  })
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User does not found.");
+  }
+
+  const updateUserStatusResult = await prisma.user.update({
+    where: {
+      id
+    },
+    data: {
+      status
+    }
+  });
+
+  return updateUserStatusResult;
+};
+
 export const UserService = {
   createUserAndDoctorService,
   createPatientService,
   getAllUserDb,
   createUserAndAdminService,
-  getMeUserFromDb
+  getMeUserFromDb,
+  updateUserStatusService
 };

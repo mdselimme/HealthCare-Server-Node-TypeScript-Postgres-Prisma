@@ -11,10 +11,11 @@ import checkAuth from "../../middlewares/checkAuth";
 import { UserRole } from "@prisma/client";
 
 const router = Router();
+
 // GET ALL USER 
 router.get(
   "/",
-  checkAuth(UserRole.ADMIN, UserRole.DOCTOR),
+  checkAuth(UserRole.ADMIN),
   UserController.getAllUser
 );
 
@@ -47,6 +48,12 @@ router.post(
   validZodSchemaRequest(createAdminZodSchema),
   UserController.createUserAndAdmin
 );
+
+//UPDATE USER ROUTE
+router.patch("/:id/status"
+  , checkAuth(UserRole.ADMIN),
+  UserController.updateUserStatus
+)
 
 export const UserRouter = router;
 
