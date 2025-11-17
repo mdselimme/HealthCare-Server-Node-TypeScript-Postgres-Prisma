@@ -53,7 +53,14 @@ router.post(
 router.patch("/:id/status"
   , checkAuth(UserRole.ADMIN),
   UserController.updateUserStatus
-)
+);
+
+// UPDATE MY PROFILE ROUTE 
+router.patch("/my-profile",
+  checkAuth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+  fileUploader.upload.single("file"),
+  UserController.updateMyProfile
+);
 
 export const UserRouter = router;
 

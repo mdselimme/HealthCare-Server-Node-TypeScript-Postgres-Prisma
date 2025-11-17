@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import { AppError } from "../../helpers/AppError";
 import httpStatus from "http-status";
 import { calculatePagination } from "../../helpers/paginationHelpers";
-import { Prisma, UserRole, UserStatus } from "@prisma/client";
+import { Prisma, User, UserRole, UserStatus } from "@prisma/client";
 import { userSearchableFields } from "./user.constant";
 import { uploadImage } from "../../helpers/fileUploader";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
@@ -260,11 +260,12 @@ const getMeUserFromDb = async (decodedToken: IJwtPayload) => {
 };
 
 // UPDATE USER STATUS SERVICE 
-const updateUserStatusService = async (id: string, status: UserStatus) => {
+const updateUserStatusService = async (id: string, payload: { status: UserStatus }) => {
 
   const user = await prisma.user.findUnique({
     where: { id }
   })
+
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User does not found.");
   }
@@ -274,11 +275,63 @@ const updateUserStatusService = async (id: string, status: UserStatus) => {
       id
     },
     data: {
-      status
+      status: payload.status
     }
   });
 
   return updateUserStatusResult;
+};
+
+// UPDATE MY PROFILE SERVICE 
+const updateMyProfileService = async (decodedToken: IJwtPayload, req: Request) => {
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: decodedToken.userId,
+      status: UserStatus.ACTIVE
+    }
+  });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User does not found.");
+  };
+
+  if (req.file) {
+    const imageUrl = await uploadImage(req);
+    req.body.profilePhoto = imageUrl;
+  };
+
+  let profileInfo: Partial<User> = {};
+
+  if (user.role === UserRole.ADMIN) {
+    profileInfo = await prisma.admin.update({
+      where: {
+        email: user.email
+      },
+      data: req.body
+    })
+  }
+  else if (user.role === UserRole.DOCTOR) {
+    profileInfo = await prisma.doctor.update({
+      where: {
+        email: user.email
+      },
+      data: req.body
+    })
+  }
+  else if (user.role === UserRole.PATIENT) {
+    profileInfo = await prisma.patient.update({
+      where: {
+        email: user.email
+      },
+      data: req.body
+    })
+  }
+
+  const { password: _, ...restUserData } = profileInfo;
+
+  return { ...restUserData };
+
 };
 
 export const UserService = {
@@ -287,5 +340,6 @@ export const UserService = {
   getAllUserDb,
   createUserAndAdminService,
   getMeUserFromDb,
-  updateUserStatusService
+  updateUserStatusService,
+  updateMyProfileService
 };

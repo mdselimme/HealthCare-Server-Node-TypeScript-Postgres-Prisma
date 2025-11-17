@@ -99,11 +99,27 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// UPDATE MY PROFILE
+const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const decodedToken = req.user;
+
+  const result = await UserService.updateMyProfileService(decodedToken as IJwtPayload, req);
+
+  sendResponse(res, {
+    success: true,
+    message: "My Profile updated successfully.",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+
+});
+
 export const UserController = {
   createPatient,
   getAllUser,
   createUserAndDoctor,
   createUserAndAdmin,
   getMeUserFromDb,
-  updateUserStatus
+  updateUserStatus,
+  updateMyProfile
 };
