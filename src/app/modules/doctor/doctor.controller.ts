@@ -73,9 +73,35 @@ const getDoctorById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// SOFT DELETE DOCTOR BY ID 
+const softDeleteDoctorById = catchAsync(async (req: Request, res: Response) => {
+  const result = await DoctorServices.softDeleteDoctorById(req.params.id);
+
+  sendResponse(res, {
+    success: true,
+    message: "Doctor Soft Deleted Successfully.",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
+// DELETE DOCTOR BY ID
+const deleteDoctorById = catchAsync(async (req: Request, res: Response) => {
+  const result = await DoctorServices.deleteDoctorById(req.params.id);
+
+  sendResponse(res, {
+    success: true,
+    message: "Doctor Deleted Successfully.",
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
 export const DoctorController = {
   getAllDoctorDB,
   updateDoctor,
   getAISuggestion,
   getDoctorById,
+  softDeleteDoctorById,
+  deleteDoctorById,
 };
