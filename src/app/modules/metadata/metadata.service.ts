@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { PaymentStatus, UserRole } from "@prisma/client";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
 import { AppError } from "../../helpers/AppError";
@@ -11,7 +12,7 @@ const fetchDashboardMetaData = async (decodedToken: IJwtPayload) => {
       metadata = await getAdminMetaData();
       break;
     case UserRole.DOCTOR:
-      metadata = "doctor_metadata";
+      metadata = await getDoctorMetaData(decodedToken);
       break;
     case UserRole.PATIENT:
       metadata = "patient_metadata";
@@ -22,6 +23,7 @@ const fetchDashboardMetaData = async (decodedToken: IJwtPayload) => {
   return metadata;
 };
 
+// GET ADMIN METADATA FOR DASHBOARD
 const getAdminMetaData = async () => {
   const patientCount = await prisma.patient.count();
   const adminCount = await prisma.admin.count();
@@ -36,18 +38,9 @@ const getAdminMetaData = async () => {
       status: PaymentStatus.PAID,
     },
   });
-  //   const barChartData = await getBarChartData();
+  const barChartData = await getBarChartData();
   const pieChartData = await getPieChartData();
-  console.log({
-    patientCount,
-    adminCount,
-    doctorCount,
-    appointmentCount,
-    paymentCount,
-    totalPaidRevenue,
-    // barChartData,
-    pieChartData,
-  });
+
   return {
     patientCount,
     adminCount,
@@ -55,21 +48,21 @@ const getAdminMetaData = async () => {
     appointmentCount,
     paymentCount,
     totalPaidRevenue,
-    // barChartData,
+    barChartData,
     pieChartData,
   };
 };
 
-// const getBarChartData = async () => {
-//   const appointmentCountPerMonth = await prisma.$queryRaw`
-//   SELECT DATA_TRUNK('month', 'createdAt') AS month,
-//   CAST(COUNT(*) AS INTEGER) AS count
-//   FROM "appointment"
-//   GROUP BY month
-//   ORDER BY month ASC
-//   `;
-//   return appointmentCountPerMonth;
-// };
+const getBarChartData = async () => {
+  const appointmentCountPerMonth = await prisma.$queryRaw`
+  SELECT DATA_TRUNK('month', 'createdAt') AS month,
+  CAST(COUNT(*) AS INTEGER) AS count
+  FROM "appointment"
+  GROUP BY month
+  ORDER BY month ASC
+  `;
+  return appointmentCountPerMonth;
+};
 
 const getPieChartData = async () => {
   const appointStatusDistribution = await prisma.user.groupBy({
@@ -83,6 +76,70 @@ const getPieChartData = async () => {
     })
   );
   return formatAppointmentStatusDistribution;
+};
+
+// GET DOCTOR METADATA FOR DASHBOARD 
+const getDoctorMetaData = async (decodedToken: IJwtPayload) => {
+  const doctor = await prisma.doctor.findUnique({
+    where: {
+      email: decodedToken.email,
+    },
+  });
+  const appointmentCount = await prisma.appointment.count({
+    where: {
+      doctorId: doctor?.id,
+    },
+  });
+  const patientCount = await prisma.appointment.groupBy({
+    by: ["patientId"],
+    _count: { patientId: true },
+    where: {
+      patientId: doctor?.id,
+    },
+  });
+
+  const reviewCount = await prisma.review.count({
+    where: {
+      doctorId: doctor?.id,
+    },
+  });
+
+  const totalRevenue = await prisma.payment.aggregate({
+    _sum: {
+      amount: true,
+    },
+    where: {
+      appointment: {
+        doctorId: doctor?.id,
+      },
+      status: PaymentStatus.PAID,
+    },
+  });
+
+  const appointmentStatusDistribution = await prisma.appointment.groupBy({
+    by: ["status"],
+    _count: { id: true },
+    where: {
+      doctorId: doctor?.id,
+    },
+  });
+
+  const formatAppointmentStatusDistribution = appointmentStatusDistribution.map(
+    ({ status, _count }) => ({
+      status,
+      count: Number(_count.id),
+    })
+  );
+
+  const formatPatientCount = patientCount.length;
+
+  return {
+    appointmentCount,
+    patientCount: formatPatientCount,
+    reviewCount,
+    totalRevenue,
+    appointmentStatusDistribution: formatAppointmentStatusDistribution,
+  };
 };
 
 export const MetaDataService = {
