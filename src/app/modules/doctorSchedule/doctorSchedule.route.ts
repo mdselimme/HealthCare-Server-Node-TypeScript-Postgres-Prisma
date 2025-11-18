@@ -13,12 +13,21 @@ const router = Router();
 router.post("/",
     checkAuth(UserRole.DOCTOR),
     validZodSchemaRequest(createDoctorScheduleZodSchema),
-    DoctorScheduleController.createDoctorSchedule);
+    DoctorScheduleController.createDoctorSchedule
+);
+
 // GET SCHEDULE ALL DOCTOR
 router.get("/",
     checkAuth(UserRole.ADMIN, UserRole.DOCTOR),
     DoctorScheduleController.doctorScheduleAll
 );
+
+// GET MY SCHEDULE ROUTE 
+router.get("/my-schedule",
+    checkAuth(UserRole.DOCTOR),
+    DoctorScheduleController.getMySchedule
+);
+
 // DELETE SCHEDULE ALL DOCTOR
 router.delete("/:id",
     checkAuth(UserRole.ADMIN, UserRole.DOCTOR),

@@ -5,6 +5,8 @@ import { Request, Response } from 'express';
 import sendResponse from '../../shared/sendResponse';
 import { JwtPayload } from 'jsonwebtoken';
 import { IJwtPayload } from '../../interfaces/jwtPayload';
+import { searchQuery } from '../../helpers/searchQuery';
+import { doctorFilterScheduleConstants, doctorSortDataConstants } from './doctorSchedule.constant';
 
 
 
@@ -39,6 +41,25 @@ const doctorScheduleAll = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+// DOCTOR SCHEDULE GET MY SCHEDULE
+const getMySchedule = catchAsync(async (req: Request, res: Response) => {
+
+    const decodedToken = req.user;
+
+    const filters = searchQuery(req.query, doctorFilterScheduleConstants);
+    const options = searchQuery(req.query, doctorSortDataConstants)
+
+    const result = await DoctorScheduleService.getMyScheduleService(decodedToken as IJwtPayload, filters, options);
+
+    sendResponse(res, {
+        success: true,
+        message: "Doctor Schedule Retrieved Successfully",
+        data: result,
+        statusCode: httpStatus.OK,
+    });
+
+})
+
 // DOCTOR SCHEDULE GET 
 const deleteDoctorSchedule = catchAsync(async (req: Request, res: Response) => {
 
@@ -56,5 +77,6 @@ const deleteDoctorSchedule = catchAsync(async (req: Request, res: Response) => {
 export const DoctorScheduleController = {
     createDoctorSchedule,
     doctorScheduleAll,
-    deleteDoctorSchedule
+    deleteDoctorSchedule,
+    getMySchedule
 };
