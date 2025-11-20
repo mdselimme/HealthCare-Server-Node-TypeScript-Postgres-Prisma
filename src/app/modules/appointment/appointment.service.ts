@@ -5,7 +5,7 @@ import { prisma } from "../../shared/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { stripe } from "../../helpers/stripe";
 import { calculatePagination, IOptions } from "../../helpers/paginationHelpers";
-import { AppointmentStatus, Prisma, UserRole } from "@prisma/client";
+import { AppointmentStatus, PaymentStatus, Prisma, UserRole } from "@prisma/client";
 
 // CREATE AN APPOINTMENT
 const createAnAppointment = async (
@@ -263,6 +263,7 @@ const cancelUnpaidAppointment = async () => {
       createdAt: {
         lte: thirtyMinAgo,
       },
+      paymentStatus: PaymentStatus.UNPAID,
     },
   });
 

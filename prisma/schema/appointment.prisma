@@ -14,9 +14,11 @@ model Appointment {
     paymentStatus PaymentStatus @default(UNPAID)
     createdAt DateTime @default(now())
     updatedAt DateTime  @updatedAt
+    doctorSchedules DoctorSchedules?
     payment Payment?
     prescription Prescription?
     review  Review?
+
     @@map("appointment")
 }
 
