@@ -5,14 +5,22 @@ import { prisma } from "../../shared/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { stripe } from "../../helpers/stripe";
 import { calculatePagination, IOptions } from "../../helpers/paginationHelpers";
+<<<<<<< HEAD
 import { AppointmentStatus, PaymentStatus, Prisma, UserRole } from "@prisma/client";
+=======
+import {
+  AppointmentStatus,
+  PaymentStatus,
+  Prisma,
+  UserRole,
+} from "@prisma/client";
+>>>>>>> 61d1af78a62eea786120603878cae7ac6723688b
 
 // CREATE AN APPOINTMENT
 const createAnAppointment = async (
   decodedToken: IJwtPayload,
   payload: { doctorId: string; scheduleId: string }
 ) => {
-
   const patientData = await prisma.patient.findUniqueOrThrow({
     where: {
       email: decodedToken.email,
@@ -96,10 +104,7 @@ const createAnAppointment = async (
 };
 
 // GET ALL APPOINTMENT
-const getAllAppointment = async (
-  filters: any,
-  options: IOptions
-) => {
+const getAllAppointment = async (filters: any, options: IOptions) => {
   const { page, limit, skip } = calculatePagination(options);
   const { patientEmail, doctorEmail, ...filterData } = filters;
 
@@ -117,7 +122,7 @@ const getAllAppointment = async (
         email: doctorEmail,
       },
     });
-  };
+  }
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
       AND: Object.keys(filterData).map((key) => {
@@ -137,9 +142,12 @@ const getAllAppointment = async (
     where: whereConditions,
     skip,
     take: limit,
-    orderBy: options.sortBy && options.sortOrder ? {
-      [options.sortBy]: options.sortOrder,
-    } : { createdAt: 'desc' },
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? {
+            [options.sortBy]: options.sortOrder,
+          }
+        : { createdAt: "desc" },
     include: { patient: true, doctor: true },
   });
   const total = await prisma.appointment.count({
@@ -307,5 +315,5 @@ export const AppointmentServices = {
   getMyAppointment,
   updateAppointmentStatus,
   cancelUnpaidAppointment,
-  getAllAppointment
+  getAllAppointment,
 };
