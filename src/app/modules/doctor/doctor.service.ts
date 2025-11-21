@@ -3,9 +3,10 @@ import { Doctor, Prisma, UserStatus } from "@prisma/client";
 import { calculatePagination, IOptions } from "../../helpers/paginationHelpers";
 import { prisma } from "../../shared/prisma";
 import { AppError } from "../../helpers/AppError";
-import { IDoctorUpdateInput } from "./doctor.interface";
+
 import { openai } from "../../helpers/askOpenRouter";
 import { extractJsonFromMessage } from "../../helpers/extractJsonFromMessage";
+import { IDoctorUpdate } from "./doctor.interface";
 
 // GET ALL DOCTORS FROM DB
 const getAllDoctorsFromDb = async (options: IOptions, filters: any) => {
@@ -93,11 +94,12 @@ const getAllDoctorsFromDb = async (options: IOptions, filters: any) => {
 // UPDATE DOCTOR
 const updateDoctor = async (
   email: string,
-  payload: Partial<IDoctorUpdateInput>
+  payload: Partial<IDoctorUpdate>
 ) => {
   const doctorInfo = await prisma.doctor.findUnique({
     where: {
       email: email,
+      isDeleted: false,
     },
   });
 
@@ -105,42 +107,113 @@ const updateDoctor = async (
     throw new AppError(httpStatus.BAD_REQUEST, "doctor data does not found.");
   }
 
-  const { specialties, ...doctorData } = payload;
+  const { specialties, removeSpecialties, ...doctorData } = payload;
 
   return await prisma.$transaction(async (trx) => {
-    if (specialties && specialties.length > 0) {
-      const deleteSpecialtyId = specialties.filter(
-        (specialty: any) => specialty.isDeleted
-      );
 
-      for (const specialty of deleteSpecialtyId) {
-        await trx.doctorSpecialties.deleteMany({
-          where: {
-            doctorId: doctorInfo.id,
-            specialitiesId: specialty.specialtyId,
+    // update doctor basic data 
+    if (Object.keys(doctorData).length > 0) {
+      await trx.doctor.update({
+        where: {
+          email: email,
+        },
+        data: doctorData,
+      });
+    };
+
+    // remove specialties if provided 
+    if (removeSpecialties && Array.isArray(removeSpecialties) && removeSpecialties.length > 0) {
+
+      // validate that specialities to be removed exist for the doctor
+      const existingDoctorSpecialties = await trx.doctorSpecialties.findMany({
+        where: {
+          doctorId: doctorInfo.id,
+          specialitiesId: {
+            in: removeSpecialties
           },
-        });
+        },
+      });
+
+      if (existingDoctorSpecialties.length !== removeSpecialties.length) {
+        const foundIds = existingDoctorSpecialties.map(ds => ds.specialitiesId);
+        const notFoundIds = removeSpecialties.filter(id => !foundIds.includes(id));
+        throw new AppError(httpStatus.BAD_REQUEST, `Specialties to be removed not found for the doctor: ${notFoundIds.join(", ")}`);
       }
 
-      const createSpecialtyId = specialties.filter(
-        (specialty: any) => !specialty.isDeleted
+      // Delete the specialties 
+      await trx.doctorSpecialties.deleteMany({
+        where: {
+          doctorId: doctorInfo.id,
+          specialitiesId: {
+            in: removeSpecialties
+          },
+        },
+      });
+    };
+
+    // Add new specialties if provided 
+    if (specialties && Array.isArray(specialties) && specialties.length > 0) {
+      // Verify all specialties exist in Specialties table
+      const existingSpecialties = await trx.specialties.findMany({
+        where: {
+          id: {
+            in: specialties,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const existingSpecialtyIds = existingSpecialties.map((s) => s.id);
+      const invalidSpecialties = specialties.filter(
+        (id) => !existingSpecialtyIds.includes(id)
       );
 
-      for (const specialty of createSpecialtyId) {
-        await trx.doctorSpecialties.create({
-          data: {
+      if (invalidSpecialties.length > 0) {
+        throw new Error(
+          `Invalid specialty IDs: ${invalidSpecialties.join(", ")}`
+        );
+      }
+      // Check for duplicates - don't add specialties that already exist
+      const currentDoctorSpecialties =
+        await trx.doctorSpecialties.findMany({
+          where: {
             doctorId: doctorInfo.id,
-            specialitiesId: specialty.specialtyId,
+            specialitiesId: {
+              in: specialties,
+            },
           },
+          select: {
+            specialitiesId: true,
+          },
+        });
+
+      const currentSpecialtyIds = currentDoctorSpecialties.map(
+        (ds) => ds.specialitiesId
+      );
+      const newSpecialties = specialties.filter(
+        (id) => !currentSpecialtyIds.includes(id)
+      );
+
+      // Only create new specialties that don't already exist
+      if (newSpecialties.length > 0) {
+        const doctorSpecialtiesData = newSpecialties.map((specialtyId) => ({
+          doctorId: doctorInfo.id,
+          specialitiesId: specialtyId,
+        }));
+
+        await trx.doctorSpecialties.createMany({
+          data: doctorSpecialtiesData,
         });
       }
     }
 
-    return await trx.doctor.update({
+    // return update doctor with specialties 
+    const result = await prisma.doctor.findUnique({
       where: {
         id: doctorInfo.id,
       },
-      data: doctorData,
       include: {
         doctorSpecialties: {
           include: {
@@ -149,7 +222,11 @@ const updateDoctor = async (
         },
       },
     });
+
+    return result;
   });
+
+
 };
 
 // GET AI DOCTOR SUGGESTION
