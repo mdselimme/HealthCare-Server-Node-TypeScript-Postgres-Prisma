@@ -74,7 +74,12 @@ const createUserAndDoctorService = async (req: Request) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Email Already Exist.");
   }
 
+  const { specialties, ...doctorData } = req.body.doctor;
+
+
   const result = await prisma.$transaction(async (tnx) => {
+
+    // create user 
     await tnx.user.create({
       data: {
         email: req.body.doctor.email,
@@ -82,9 +87,55 @@ const createUserAndDoctorService = async (req: Request) => {
         role: UserRole.DOCTOR
       },
     });
-    return await tnx.doctor.create({
-      data: req.body.doctor,
+    // create doctor 
+    const createDoctorData = await tnx.doctor.create({
+      data: doctorData,
     });
+
+    if (specialties && Array.isArray(specialties) && specialties.length > 0) {
+      const existingSpecialties = await tnx.specialties.findMany({
+        where: {
+          id: {
+            in: specialties
+          }
+        },
+        select: {
+          id: true
+        }
+      });
+      const existingSpecialityIds = existingSpecialties.map(spec => spec.id);
+
+      const invalidSpecialities = specialties.filter((id) => !existingSpecialityIds.includes(id));
+
+      if (invalidSpecialities.length > 0) {
+        throw new AppError(httpStatus.BAD_REQUEST, `Invalid Speciality IDs: ${invalidSpecialities.join(", ")}`
+        );
+      }
+      // create doctor specialties relations 
+      const doctorSpecialtyData = specialties.map((specialtyId: string) => ({
+        doctorId: createDoctorData.id,
+        specialitiesId: specialtyId
+      }));
+
+      await tnx.doctorSpecialties.createMany({
+        data: doctorSpecialtyData
+      });
+    }
+
+    // return doctor with specialties 
+    const doctorWithSpecialities = await tnx.doctor.findUnique({
+      where: {
+        id: createDoctorData.id
+      },
+      include: {
+        doctorSpecialties: {
+          include: {
+            specialities: true
+          }
+        }
+      }
+    });
+    return doctorWithSpecialities;
   });
   return result;
 };
