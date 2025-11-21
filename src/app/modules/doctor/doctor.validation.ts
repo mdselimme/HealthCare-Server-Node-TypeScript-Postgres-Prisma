@@ -50,8 +50,7 @@ export const updateDoctorZodSchema = z.object({
         qualification: z.string().optional(),
         currentWorkingPlace: z.string().optional(),
         designation: z.string().optional(),
-        // NEW: Add specialties management
-        specialties: z.array(z.string().uuid()).optional(),
-        removeSpecialties: z.array(z.string().uuid()).optional(),
+        specialties: z.array(z.uuid()).optional(),
+        removeSpecialties: z.array(z.uuid()).optional(),
     }),
 });

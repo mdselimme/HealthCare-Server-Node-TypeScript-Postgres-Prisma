@@ -7,7 +7,7 @@ import { Prisma } from "@prisma/client";
 const scheduleCreateService = async (payload: any) => {
     const { startTime, endTime, startDate, endDate } = payload;
 
-    const interValTime = 30;
+    const intervalTime = 30;
 
     const currentDate = new Date(startDate);
     const lastDate = new Date(endDate);
@@ -36,7 +36,7 @@ const scheduleCreateService = async (payload: any) => {
 
         while (startDateTime < endDateTime) {
             const slotStartDateTime = startDateTime;
-            const slotEndDateTime = addMinutes(startDateTime, interValTime);
+            const slotEndDateTime = addMinutes(startDateTime, intervalTime);
             const scheduleData = {
                 startDateTime: slotStartDateTime,
                 endDateTime: slotEndDateTime
@@ -53,7 +53,7 @@ const scheduleCreateService = async (payload: any) => {
                 schedule.push(result)
             }
 
-            slotStartDateTime.setMinutes(slotStartDateTime.getMinutes() + interValTime)
+            slotStartDateTime.setMinutes(slotStartDateTime.getMinutes() + intervalTime)
 
         }
         currentDate.setDate(currentDate.getDate() + 1)

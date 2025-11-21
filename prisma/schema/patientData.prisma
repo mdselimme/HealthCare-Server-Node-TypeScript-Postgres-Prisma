@@ -35,5 +35,5 @@ model MedicalReport {
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
 
-    @@map("madical_reports")
+    @@map("medical_reports")
 }

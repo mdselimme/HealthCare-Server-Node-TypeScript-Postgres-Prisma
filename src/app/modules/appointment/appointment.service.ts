@@ -5,16 +5,7 @@ import { prisma } from "../../shared/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { stripe } from "../../helpers/stripe";
 import { calculatePagination, IOptions } from "../../helpers/paginationHelpers";
-<<<<<<< HEAD
 import { AppointmentStatus, PaymentStatus, Prisma, UserRole } from "@prisma/client";
-=======
-import {
-  AppointmentStatus,
-  PaymentStatus,
-  Prisma,
-  UserRole,
-} from "@prisma/client";
->>>>>>> 61d1af78a62eea786120603878cae7ac6723688b
 
 // CREATE AN APPOINTMENT
 const createAnAppointment = async (
@@ -145,8 +136,8 @@ const getAllAppointment = async (filters: any, options: IOptions) => {
     orderBy:
       options.sortBy && options.sortOrder
         ? {
-            [options.sortBy]: options.sortOrder,
-          }
+          [options.sortBy]: options.sortOrder,
+        }
         : { createdAt: "desc" },
     include: { patient: true, doctor: true },
   });
