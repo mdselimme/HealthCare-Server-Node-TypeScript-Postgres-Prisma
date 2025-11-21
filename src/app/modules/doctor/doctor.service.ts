@@ -7,6 +7,7 @@ import { AppError } from "../../helpers/AppError";
 import { openai } from "../../helpers/askOpenRouter";
 import { extractJsonFromMessage } from "../../helpers/extractJsonFromMessage";
 import { IDoctorUpdate } from "./doctor.interface";
+import { doctorSearchableFields } from "./doctor.constants";
 
 // GET ALL DOCTORS FROM DB
 const getAllDoctorsFromDb = async (options: IOptions, filters: any) => {
@@ -15,7 +16,6 @@ const getAllDoctorsFromDb = async (options: IOptions, filters: any) => {
 
   const andConditions: Prisma.DoctorWhereInput[] = [];
 
-  const doctorSearchableFields = ["name", "email", "contactNumber"];
 
   if (searchTerm) {
     andConditions.push({

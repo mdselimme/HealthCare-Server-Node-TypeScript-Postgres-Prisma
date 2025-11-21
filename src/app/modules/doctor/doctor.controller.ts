@@ -4,6 +4,7 @@ import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { searchQuery } from "../../helpers/searchQuery";
 import { DoctorServices } from "./doctor.service";
+import { doctorFilterScheduleConstants } from "../doctorSchedule/doctorSchedule.constant";
 
 // DOCTOR GET ALL DB
 const getAllDoctorDB = catchAsync(async (req: Request, res: Response) => {
@@ -13,14 +14,7 @@ const getAllDoctorDB = catchAsync(async (req: Request, res: Response) => {
     "sortBy",
     "sortOrder",
   ]);
-  const filters = searchQuery(req.query, [
-    "email",
-    "contactNumber",
-    "gender",
-    "appointmentFee",
-    "specialties",
-    "searchTerm",
-  ]);
+  const filters = searchQuery(req.query, doctorFilterScheduleConstants);
 
   const result = await DoctorServices.getAllDoctorsFromDb(options, filters);
 
