@@ -1,3 +1,4 @@
+import { UserStatus } from "@prisma/client";
 import z from "zod";
 
 //CREATE USER WITH PATIENT ZOD SCHEMA
@@ -51,6 +52,16 @@ export const createDoctorValidationZodSchema = z.object({
     qualification: z.string({ error: "qualification type is string." }),
     currentWorkingPlace: z.string({ error: "current Working Place type is string." }),
     designation: z.string({ error: "designation type is string." }),
+    specialties: z
+      .array(
+        z.uuid({
+          message: "Each specialty must be a valid UUID",
+        })
+      )
+      .min(1, {
+        message: "At least one specialty is required",
+      })
+      .optional(),
   })
 });
 
@@ -76,3 +87,10 @@ export const createAdminZodSchema = z.object({
     address: z.string({ error: "address type is string." }),
   })
 });
+
+// UPDATE USER STATUS 
+export const updateUserStatusZodSchema = z.object({
+  body: z.object({
+    status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED, UserStatus.DELETED])
+  })
+})
