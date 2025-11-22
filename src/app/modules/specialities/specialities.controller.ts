@@ -3,6 +3,7 @@ import httpStatus from "http-status";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { SpecialtiesService } from "./specialities.service";
+import { searchQuery } from "../../helpers/searchQuery";
 
 const createSpeciality = catchAsync(async (req: Request, res: Response) => {
     const result = await SpecialtiesService.inserIntoDB(req);
@@ -16,7 +17,10 @@ const createSpeciality = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getSpecialityAll = catchAsync(async (req: Request, res: Response) => {
-    const result = await SpecialtiesService.getAllFromDB();
+
+    const options = searchQuery(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+    const result = await SpecialtiesService.getAllFromDB(options);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
