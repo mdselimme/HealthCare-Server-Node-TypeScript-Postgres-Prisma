@@ -1,0 +1,41 @@
+model appointments {
+  id             String            @id
+  patientId      String
+  doctorId       String
+  scheduleId     String
+  videoCallingId String
+  status         AppointmentStatus @default(SCHEDULED)
+  paymentStatus  PaymentStatus     @default(UNPAID)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime
+  doctors        Doctor            @relation(fields: [doctorId], references: [id])
+  patients       Patient           @relation(fields: [patientId], references: [id])
+  schedules      Schedule          @relation(fields: [scheduleId], references: [id])
+  payment        Payment?
+  prescriptions  prescriptions?
+  review         Review?
+}
+
+model madical_reports {
+  id         String   @id
+  patientId  String
+  reportName String
+  reportLink String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  patients   Patient  @relation(fields: [patientId], references: [id])
+}
+
+model prescriptions {
+  id            String       @id
+  appointmentId String       @unique
+  doctorId      String
+  patientId     String
+  instructions  String
+  followUpDate  DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime
+  appointments  appointments @relation(fields: [appointmentId], references: [id])
+  doctors       Doctor       @relation(fields: [doctorId], references: [id])
+  patients      Patient      @relation(fields: [patientId], references: [id])
+}
