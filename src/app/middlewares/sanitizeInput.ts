@@ -8,19 +8,19 @@ export const sanitizeInput = (
     res: Response,
     next: NextFunction
 ) => {
-    // Sanitize body
-    if (req.body) {
-        req.body = sanitizeObject(req.body);
+    // Sanitize body (mutate instead of replace)
+    if (req.body && typeof req.body === "object") {
+        Object.assign(req.body, sanitizeObject(req.body));
     }
 
-    // Sanitize query
-    if (req.query) {
-        req.query = sanitizeObject(req.query);
+    // Sanitize query (cannot reassign in Express 5)
+    if (req.query && typeof req.query === "object") {
+        Object.assign(req.query, sanitizeObject(req.query));
     }
 
-    // Sanitize params
-    if (req.params) {
-        req.params = sanitizeObject(req.params);
+    // Sanitize params (cannot reassign)
+    if (req.params && typeof req.params === "object") {
+        Object.assign(req.params, sanitizeObject(req.params));
     }
 
     next();
@@ -37,7 +37,7 @@ const sanitizeObject = (obj: any): any => {
 
     const sanitized: any = {};
     for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
             sanitized[key] = sanitizeObject(obj[key]);
         }
     }
@@ -52,8 +52,8 @@ const sanitizeValue = (value: any): any => {
         // Remove null bytes
         value = value.replace(/\0/g, "");
 
-        // HTML encode dangerous characters (optional - depends on use case)
-        // value = value.replace(/[<>]/g, '');
+        // Optional: strip dangerous HTML chars
+        // value = value.replace(/[<>]/g, "");
     }
     return value;
 };
