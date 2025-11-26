@@ -9,7 +9,7 @@ import { patientSearchableFields } from './patient.constant';
 
 
 // GET ALL PATIENT DATA SERVICE
-const getAllPatientData = async (filters: IPatientFilter, options: IOptions) => {
+const getAllPatientData = async (filters: IPatientFilter, options: IOptions, includeHealthData: boolean = false) => {
 
   const { limit, page, skip } = calculatePagination(options);
   const { searchTerm, ...filterData } = filters;
@@ -44,6 +44,22 @@ const getAllPatientData = async (filters: IPatientFilter, options: IOptions) => 
 
   const whereCondition: Prisma.PatientWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
 
+  // Conditional include based on parameter
+  const includeClause = includeHealthData
+    ? {
+      medicalReport: true,
+      patientHealthData: true,
+    }
+    : {
+      medicalReport: {
+        select: {
+          id: true,
+          reportName: true,
+          createdAt: true,
+        },
+      },
+    };
+
   const result = await prisma.patient.findMany({
     where: whereCondition,
     skip: skip,
@@ -51,6 +67,7 @@ const getAllPatientData = async (filters: IPatientFilter, options: IOptions) => 
     orderBy: options.sortBy && options.sortOrder ? { [options.sortBy]: options.sortOrder }
       :
       { createdAt: 'desc' },
+    include: includeClause,
   });
 
   const total = await prisma.patient.count({
