@@ -18,8 +18,19 @@ const initPayment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// PAYMENT VALIDATE SERVICE
+const validatePayment = catchAsync(async (req: Request, res: Response) => {
+  const result = await PaymentService.validatePayment(req.query);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Payment validate successfully',
+    data: result,
+  });
+});
 
 
+// handle webhook stripe event
 const handleStripeWebhookEvent = catchAsync(
   async (req: Request, res: Response) => {
     const sig = req.headers["stripe-signature"] as string;

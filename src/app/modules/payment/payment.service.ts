@@ -41,6 +41,52 @@ const initPayment = async (appointmentId: string) => {
   };
 };
 
+// SSL PAYMENT VALIDATION
+const validatePayment = async (payload: any) => {
+  // if (!payload || !payload.status || !(payload.status === 'VALID')) {
+  //     return {
+  //         message: "Invalid Payment!"
+  //     }
+  // }
+
+  // const response = await SSLService.validatePayment(payload);
+
+  // if (response?.status !== 'VALID') {
+  //     return {
+  //         message: "Payment Failed!"
+  //     }
+  // }
+
+  const response = payload;
+
+  await prisma.$transaction(async (tx) => {
+    const updatedPaymentData = await tx.payment.update({
+      where: {
+        transactionId: response.tran_id
+      },
+      data: {
+        status: PaymentStatus.PAID,
+        paymentGatewayData: response
+      }
+    });
+
+    await tx.appointment.update({
+      where: {
+        id: updatedPaymentData.appointmentId
+      },
+      data: {
+        paymentStatus: PaymentStatus.PAID
+      }
+    })
+  });
+
+  return {
+    message: "Payment success!"
+  }
+
+}
+
+// HANDLE STRIPE WEBHOOK EVENT 
 const handleStripeWebhookEvent = async (event: Stripe.Event) => {
   switch (event.type) {
     case "checkout.session.completed": {
@@ -84,5 +130,6 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 
 export const PaymentService = {
   handleStripeWebhookEvent,
-  initPayment
+  initPayment,
+  validatePayment
 };
