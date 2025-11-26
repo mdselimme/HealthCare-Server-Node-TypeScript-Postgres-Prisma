@@ -1,13 +1,13 @@
 import httpStatus from "http-status";
-import { Doctor, Prisma, UserStatus } from "@prisma/client";
+import { Prisma, UserStatus } from "@prisma/client";
 import { calculatePagination, IOptions } from "../../helpers/paginationHelpers";
 import { prisma } from "../../shared/prisma";
 import { AppError } from "../../helpers/AppError";
-
 import { openai } from "../../helpers/askOpenRouter";
 import { extractJsonFromMessage } from "../../helpers/extractJsonFromMessage";
-import { IDoctorUpdate } from "./doctor.interface";
+import { IDoctorFilterRequest, IDoctorUpdate } from "./doctor.interface";
 import { doctorSearchableFields } from "./doctor.constants";
+import { IPaginationOptions } from "../../interfaces/pagination";
 
 // GET ALL DOCTORS FROM DB
 const getAllDoctorsFromDb = async (options: IOptions, filters: any) => {
@@ -361,6 +361,123 @@ const deleteDoctorById = async (id: string) => {
   return deletedDoctor;
 };
 
+
+// GET ALL PUBLIC DOCTORS 
+const getAllPublicDoctor = async (
+  filters: IDoctorFilterRequest,
+  options: IPaginationOptions
+) => {
+  const { limit, page, skip } = calculatePagination(options);
+  const { searchTerm, specialties, ...filterData } = filters;
+
+  const andConditions: Prisma.DoctorWhereInput[] = [];
+
+  if (searchTerm) {
+    andConditions.push({
+      OR: doctorSearchableFields.map((field) => ({
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  // Handle multiple specialties: ?specialties=Cardiology&specialties=Neurology
+  if (specialties && specialties.length > 0) {
+    // Convert to array if single string
+    const specialtiesArray = Array.isArray(specialties) ? specialties : [specialties];
+
+    andConditions.push({
+      doctorSpecialties: {
+        some: {
+          specialities: {
+            title: {
+              in: specialtiesArray,
+              mode: "insensitive",
+            },
+          },
+        },
+      },
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    const filterConditions = Object.keys(filterData).map((key) => ({
+      [key]: {
+        equals: (filterData as any)[key],
+      },
+    }));
+    andConditions.push(...filterConditions);
+  }
+
+  andConditions.push({
+    isDeleted: false,
+  });
+
+  const whereConditions: Prisma.DoctorWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const result = await prisma.doctor.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? { [options.sortBy]: options.sortOrder }
+        : { averageRating: "desc" },
+    select: {
+      id: true,
+      name: true,
+      // email: false, // Hide email in public API
+      profilePhoto: true,
+      contactNumber: true,
+      address: true,
+      registrationNumber: true,
+      experience: true,
+      gender: true,
+      appointmentFee: true,
+      qualification: true,
+      currentWorkingPlace: true,
+      designation: true,
+      averageRating: true,
+      createdAt: true,
+      updatedAt: true,
+      doctorSpecialties: {
+        include: {
+          specialities: true,
+        },
+      },
+      reviews: {
+        select: {
+          rating: true,
+          comment: true,
+          createdAt: true,
+          patient: {
+            select: {
+              name: true,
+              profilePhoto: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const total = await prisma.doctor.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+    },
+    data: result,
+  };
+};
+
 export const DoctorServices = {
   getAllDoctorsFromDb,
   updateDoctor,
@@ -368,4 +485,5 @@ export const DoctorServices = {
   getDoctorById,
   softDeleteDoctorById,
   deleteDoctorById,
+  getAllPublicDoctor
 };
