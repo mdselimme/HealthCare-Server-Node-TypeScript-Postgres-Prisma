@@ -247,66 +247,115 @@ const getAllUserDb = async (params: any, options: any) => {
 //GET ME USER
 const getMeUserFromDb = async (decodedToken: IJwtPayload) => {
 
-  const user = await prisma.user.findUnique({
+  const userInfo = await prisma.user.findUnique({
     where: {
       id: decodedToken.userId,
       status: UserStatus.ACTIVE
     },
     omit: {
       password: true,
-      needPasswordChange: true,
-      createdAt: true,
-      updatedAt: true
     }
   });
 
-  if (!user) {
+  if (!userInfo) {
     throw new AppError(httpStatus.BAD_REQUEST, "User does not found.");
   }
 
-  let profileData;
+  let profileInfo;
 
-  if (decodedToken.role === UserRole.PATIENT) {
-    profileData = await prisma.patient.findUnique({
+  if (userInfo.role === UserRole.SUPER_ADMIN) {
+    profileInfo = await prisma.admin.findUnique({
       where: {
-        email: decodedToken.email
+        email: userInfo.email,
       },
-      omit: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePhoto: true,
+        contactNumber: true,
+        isDeleted: true,
         createdAt: true,
         updatedAt: true,
-        isDeleted: true
-      }
-    })
-  }
-  else if (decodedToken.role === UserRole.DOCTOR) {
-    profileData = await prisma.doctor.findUnique({
-      where: {
-        email: decodedToken.email
       },
-      omit: {
+    });
+  } else if (userInfo.role === UserRole.ADMIN) {
+    profileInfo = await prisma.admin.findUnique({
+      where: {
+        email: userInfo.email,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePhoto: true,
+        contactNumber: true,
+        isDeleted: true,
         createdAt: true,
         updatedAt: true,
-        isDeleted: true
-      }
-    })
-  }
-  else if (decodedToken.role === UserRole.ADMIN) {
-    profileData = await prisma.admin.findUnique({
-      where: {
-        email: decodedToken.email
       },
-      omit: {
+    });
+  } else if (userInfo.role === UserRole.DOCTOR) {
+    profileInfo = await prisma.doctor.findUnique({
+      where: {
+        email: userInfo.email,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePhoto: true,
+        contactNumber: true,
+        address: true,
+        registrationNumber: true,
+        experience: true,
+        gender: true,
+        appointmentFee: true,
+        qualification: true,
+        currentWorkingPlace: true,
+        designation: true,
+        averageRating: true,
+        isDeleted: true,
         createdAt: true,
         updatedAt: true,
-        isDeleted: true
-      }
-    })
+        doctorSpecialties: {
+          include: {
+            specialities: true,
+          },
+        },
+      },
+    });
+  } else if (userInfo.role === UserRole.PATIENT) {
+    profileInfo = await prisma.patient.findUnique({
+      where: {
+        email: userInfo.email,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePhoto: true,
+        contactNumber: true,
+        address: true,
+        isDeleted: true,
+        createdAt: true,
+        updatedAt: true,
+        patientHealthData: true,
+        medicalReports: {
+          select: {
+            id: true,
+            patientId: true,
+            reportName: true,
+            reportLink: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
   }
 
-  return {
-    ...user,
-    ...profileData
-  };
+  return { ...userInfo, ...profileInfo };
 
 };
 
