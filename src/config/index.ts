@@ -20,8 +20,8 @@ export default {
       max_requests: process.env.AUTH_RATE_LIMIT_MAX_REQUESTS,
     },
     api: {
-      max_requests: process.env.RATE_LIMIT_MAX_REQUESTS,
-      window_ms: process.env.API_RATE_LIMIT_WINDOW_MS,
+      window_ms: process.env.RATE_LIMIT_WINDOW_MS,
+      max_requests: process.env.API_RATE_LIMIT_MAX_REQUESTS,
     }
   },
   jwt: {
