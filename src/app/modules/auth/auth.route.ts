@@ -2,6 +2,7 @@ import { Router } from "express";
 import { AuthController } from "./auth.controller";
 import checkAuth from "../../middlewares/checkAuth";
 import { UserRole } from "@prisma/client";
+import { authLimiter } from "../../middlewares/rateLimiter";
 
 const router = Router();
 
@@ -10,7 +11,7 @@ router.get("/me",
     checkAuth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
     AuthController.getMeAuth);
 // USER LOGIN 
-router.post("/login", AuthController.userLogIn);
+router.post("/login", authLimiter, AuthController.userLogIn);
 // USER REFRESH TOKEN 
 router.post('/refresh-token',
     checkAuth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),

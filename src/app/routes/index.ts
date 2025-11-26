@@ -11,8 +11,12 @@ import { ReviewRouter } from "../modules/review/review.route";
 import { PatientRouter } from "../modules/patient/patient.route";
 import { MetadataRouter } from "../modules/metadata/metadata.route";
 import { AdminRouter } from "../modules/admin/admin.route";
+import { apiLimiter } from "../middlewares/rateLimiter";
 
 const router = Router();
+
+// add rate limiter for api routes
+router.use(apiLimiter);
 
 const moduleRoutes = [
   {

@@ -14,6 +14,16 @@ export default {
     api_secret: process.env.CLOUDINARY_API_SECRET,
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   },
+  rate_limiter: {
+    auth: {
+      window_ms: process.env.RATE_LIMIT_WINDOW_MS,
+      max_requests: process.env.AUTH_RATE_LIMIT_MAX_REQUESTS,
+    },
+    api: {
+      max_requests: process.env.RATE_LIMIT_MAX_REQUESTS,
+      window_ms: process.env.API_RATE_LIMIT_WINDOW_MS,
+    }
+  },
   jwt: {
     access_token_secret: process.env.JWT_ACCESS_TOKEN_SECRET,
     access_token_expires: process.env.JWT_ACCESS_TOKEN_EXPIRES,

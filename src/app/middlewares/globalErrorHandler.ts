@@ -29,7 +29,10 @@ const globalErrorHandler = (
   let error = err;
   let errorSource: TErrorSources[] = [];
 
-  console.log(error);
+
+  if (config.node_env === "development") {
+    console.error("Global Error Handler:", err);
+  }
 
   if (error.name === "ZodError") {
     const simplifiedError = handleZodError(error);
