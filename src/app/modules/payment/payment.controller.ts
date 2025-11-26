@@ -1,9 +1,24 @@
+import httpStatus from 'http-status';
 import { Request, Response } from "express";
 import catchAsync from "../../shared/catchAsync";
 import { stripe } from "../../helpers/stripe";
 import { PaymentService } from "./payment.service";
 import sendResponse from "../../shared/sendResponse";
 import config from "../../../config";
+
+// INIT PAYMENT SERVICE 
+const initPayment = catchAsync(async (req: Request, res: Response) => {
+  const { appointmentId } = req.params;
+  const result = await PaymentService.initPayment(appointmentId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Payment initiate successfully',
+    data: result,
+  });
+});
+
+
 
 const handleStripeWebhookEvent = catchAsync(
   async (req: Request, res: Response) => {
@@ -34,4 +49,6 @@ const handleStripeWebhookEvent = catchAsync(
 
 export const PaymentController = {
   handleStripeWebhookEvent,
+  validatePayment,
+  initPayment
 };

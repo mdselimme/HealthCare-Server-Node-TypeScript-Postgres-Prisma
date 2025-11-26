@@ -1,6 +1,45 @@
+import httpStatus from 'http-status';
 import Stripe from "stripe";
 import { prisma } from "../../shared/prisma";
 import { PaymentStatus } from "@prisma/client";
+import { AppError } from "../../helpers/AppError";
+import { SSLService } from '../SSL/ssl.service';
+
+
+// INIT PAYMENT SERVICE
+const initPayment = async (appointmentId: string) => {
+  const paymentData = await prisma.payment.findFirst({
+    where: {
+      appointmentId
+    },
+    include: {
+      appointment: {
+        include: {
+          patient: true
+        }
+      }
+    }
+  });
+
+  if (!paymentData) {
+    throw new AppError(httpStatus.NOT_FOUND, "Payment data not found");
+  };
+
+  const initPaymentData = {
+    amount: paymentData.amount,
+    transactionId: paymentData.transactionId,
+    name: paymentData.appointment.patient.name,
+    email: paymentData.appointment.patient.email,
+    address: paymentData.appointment.patient.address,
+    phoneNumber: paymentData.appointment.patient.contactNumber,
+  };
+
+  const result = await SSLService.initPayment(initPaymentData);
+
+  return {
+    paymentUrl: result.GatewayPageURL,
+  };
+};
 
 const handleStripeWebhookEvent = async (event: Stripe.Event) => {
   switch (event.type) {
@@ -45,4 +84,5 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 
 export const PaymentService = {
   handleStripeWebhookEvent,
+  initPayment
 };
