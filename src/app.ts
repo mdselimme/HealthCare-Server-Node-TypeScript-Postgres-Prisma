@@ -10,6 +10,7 @@ const app: Application = express();
 
 import cron from "node-cron";
 import { AppointmentServices } from "./app/modules/appointment/appointment.service";
+import { sanitizeInput } from "./app/middlewares/sanitizeInput";
 
 app.post(
   "/api/v1/payment/webhook",
@@ -28,7 +29,9 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+app.use(sanitizeInput);
 
+// Cron job to cancel unpaid appointments every minute
 cron.schedule("* * * * *", async () => {
   try {
     console.log("Node cron called at.", new Date());

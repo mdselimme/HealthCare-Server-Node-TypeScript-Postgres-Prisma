@@ -5,6 +5,18 @@ import { TErrorSources } from "../interfaces/error.types";
 import { Prisma } from "@prisma/client";
 import config from "../../config";
 
+// Sanitize error details for production
+const sanitizeError = (error: any) => {
+  // Don't expose Prisma errors in production
+  if (process.env.NODE_ENV === "production" && error.code?.startsWith("P")) {
+    return {
+      message: "Database operation failed",
+      errorDetails: null,
+    };
+  }
+  return error;
+};
+
 const globalErrorHandler = (
   err: any,
   req: Request,
@@ -54,12 +66,14 @@ const globalErrorHandler = (
     statusCode = 500;
     message = error.message;
   }
+  // Sanitize error before sending response
+  const sanitizedError = sanitizeError(error);
 
   res.status(statusCode).json({
     success,
     statusCode,
     message,
-    error,
+    error: sanitizedError,
     errorSource,
     stack: config.node_env === "development" ? error.stack : null,
   });
