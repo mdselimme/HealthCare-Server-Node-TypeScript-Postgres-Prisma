@@ -6,7 +6,7 @@ import { AuthService } from "./auth.service";
 import { setTokenInCookie } from "../../shared/setTokenCookie";
 import { IJwtPayload } from "../../interfaces/jwtPayload";
 import { AppError } from "../../helpers/AppError";
-import { get } from "http";
+
 
 // AUTH LOGIN
 const userLogIn = catchAsync(async (req: Request, res: Response) => {
@@ -43,7 +43,7 @@ const getMeAuth = catchAsync(async (req: Request, res: Response) => {
 // REFRESH TOKEN
 const refreshToken = catchAsync(async (req: Request, res: Response) => {
 
-  const token = req.cookies.refreshToken;
+  const token = req.cookies.refreshToken || req.headers.authorization;
 
   const result = await AuthService.refreshToken(token);
 

@@ -84,7 +84,9 @@ const getMeAuth = async (decodedToken: IJwtPayload) => {
 
 // REFRESH TOKEN
 const refreshToken = async (token: string) => {
+
   const decodedToken = verifyToken(token, config.jwt.refresh_token_secret as Secret) as IJwtPayload;
+
 
   const user = await prisma.user.findUnique({
     where: {
@@ -105,8 +107,12 @@ const refreshToken = async (token: string) => {
 
   const accessToken = generateToken(tokenData, config.jwt.access_token_secret as Secret, config.jwt.access_token_expires as string);
 
+  const refreshToken = generateToken(tokenData, config.jwt.refresh_token_secret as Secret, config.jwt.refresh_token_expires as string);
+
   return {
-    accessToken
+    accessToken,
+    refreshToken,
+    needPasswordChange: user.needPasswordChange
   }
 
 }

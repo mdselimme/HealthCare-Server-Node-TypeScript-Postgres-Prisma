@@ -14,7 +14,6 @@ router.get("/me",
 router.post("/login", authLimiter, AuthController.userLogIn);
 // USER REFRESH TOKEN 
 router.post('/refresh-token',
-    checkAuth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
     AuthController.refreshToken)
 //USER CHANGE PASSWORD
 router.post('/change-password',
