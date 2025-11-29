@@ -174,7 +174,7 @@ const forgotPassword = async (payload: { email: string }) => {
     email: user.email
   }
 
-  const forgotPasswordToken = generateToken(tokenData, config.jwt.forgot_password_token_secret as Secret, config.jwt.forgot_password_token_expires as string);
+  const forgotPasswordToken = generateToken(tokenData, config.jwt.access_token_secret as Secret, config.jwt.access_token_expires as string);
 
   const resetUiLink = `${config.frontend_url}/reset-password?id=${user.id}&token=${forgotPasswordToken}`;
 
@@ -191,7 +191,7 @@ const forgotPassword = async (payload: { email: string }) => {
 // reset Password
 const resetPassword = async (token: string, payload: { password: string }) => {
 
-  const verified = verifyToken(token, config.jwt.forgot_password_token_secret as Secret);
+  const verified = verifyToken(token, config.jwt.access_token_secret as Secret);
 
   if (!verified) {
     throw new AppError(httpStatus.BAD_REQUEST, "Reset Password token is not valid.")

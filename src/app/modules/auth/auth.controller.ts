@@ -91,7 +91,9 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
 // forgot Password
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
 
-  const token = req.headers.authorization;
+  const token = req.headers.authorization || req.cookies.accessToken;
+
+  console.log(token)
 
   if (!token) {
     throw new AppError(httpStatus.BAD_REQUEST, "Reset password token does not found.")

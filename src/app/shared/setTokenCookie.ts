@@ -8,7 +8,7 @@ interface IToken {
 export const setTokenInCookie = (res: Response, token: IToken) => {
   if (token.accessToken) {
     res.cookie("accessToken", token.accessToken, {
-      maxAge: 1000 * 5,
+      maxAge: 1000 * 60 * 60 * 24 * 1,
       secure: true,
       httpOnly: true,
       sameSite: "none",

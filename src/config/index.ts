@@ -29,8 +29,6 @@ export default {
     access_token_expires: process.env.JWT_ACCESS_TOKEN_EXPIRES,
     refresh_token_secret: process.env.JWT_REFRESH_TOKEN_SECRET,
     refresh_token_expires: process.env.JWT_REFRESH_TOKEN_EXPIRES,
-    forgot_password_token_secret: process.env.FORGOT_PASS_TOKEN_SECRET,
-    forgot_password_token_expires: process.env.FORGOT_PASS_TOKEN_EXPIRES,
   },
   smtp: {
     email_sender_service: process.env.SMTP_EMAIL_SENDER_SERVICE,
