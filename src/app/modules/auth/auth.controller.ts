@@ -47,6 +47,11 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 
   const result = await AuthService.refreshToken(token);
 
+  setTokenInCookie(res, {
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
+  })
+
   sendResponse(res, {
     success: true,
     message: "Refresh token retrieved Successfully",

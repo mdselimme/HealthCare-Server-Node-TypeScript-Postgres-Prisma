@@ -44,7 +44,6 @@ export const sendEmail = async (options: IEmailOptions) => {
         });
         console.log(`\u2709\uFE0F Email sent to ${options.to}: ${info.messageId}`)
     } catch (error: any) {
-        console.log(error);
         throw new AppError(500, `Failed to send email. Error Message: ${error.message}`);
     }
 }
