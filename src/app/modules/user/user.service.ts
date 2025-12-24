@@ -385,6 +385,7 @@ const updateUserStatusService = async (id: string, payload: { status: UserStatus
 // UPDATE MY PROFILE SERVICE 
 const updateMyProfileService = async (decodedToken: IJwtPayload, req: Request) => {
 
+
   const user = await prisma.user.findUnique({
     where: {
       id: decodedToken.userId,

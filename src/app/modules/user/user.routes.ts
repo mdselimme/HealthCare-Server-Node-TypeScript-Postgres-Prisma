@@ -5,6 +5,7 @@ import {
   createAdminZodSchema,
   createDoctorValidationZodSchema,
   createUserValidationZodSchema,
+  updateMyProfileZodSchema,
 } from "./user.validation";
 import { validZodSchemaRequest } from "../../middlewares/validZodSchemaRequest";
 import checkAuth from "../../middlewares/checkAuth";
@@ -56,9 +57,10 @@ router.patch("/:id/status"
 );
 
 // UPDATE MY PROFILE ROUTE 
-router.patch("/my-profile",
+router.patch("/update-my-profile",
   checkAuth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
   fileUploader.upload.single("file"),
+  validZodSchemaRequest(updateMyProfileZodSchema),
   UserController.updateMyProfile
 );
 

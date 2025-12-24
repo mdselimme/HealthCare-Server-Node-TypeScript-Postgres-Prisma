@@ -93,4 +93,13 @@ export const updateUserStatusZodSchema = z.object({
   body: z.object({
     status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED, UserStatus.DELETED])
   })
-})
+});
+
+// update my profile zod schema 
+export const updateMyProfileZodSchema = z.object({
+  name: z
+    .string({
+      error: "Name must be string.",
+    }),
+  contactNumber: z.string({ error: "contact number must be string." }).min(11, { error: "contact number must be 11 characters." }).max(11, { error: "contact number must be 11 characters." }),
+});
